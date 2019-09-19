@@ -32,7 +32,12 @@ program test_read_netcdf
   !   print *,minval(values_4d),maxval(values_4d)
   !endif
   call read_vardata(dset, 'vgrd', values_4d)
+  print *,'min/max vgrd (4d)'
   print *,minval(values_4d),maxval(values_4d)
+  print *,'min/max hgtsfc (3d)'
+  call read_vardata(dset, 'hgtsfc', values_3d)
+  print *,minval(values_3d),maxval(values_3d)
+  print *,'min/max pfull (1d_r8)'
   call read_vardata(dset, 'pfull', values8_1d)
   print *,minval(values8_1d),maxval(values8_1d)
   call destroy_dataset(dset)
