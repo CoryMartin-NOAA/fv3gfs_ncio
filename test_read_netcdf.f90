@@ -8,7 +8,7 @@ program test_read_netcdf
   real(4), allocatable, dimension(:,:,:) :: values_3d
   real(4), allocatable, dimension(:,:,:,:) :: values_4d
   integer ndim,nvar,ndims
-  filename='dynf000.nc'
+  filename='test_data/dynf000.nc'
   call create_dataset(filename, dset)
   print *,'ncid=',dset%ncid
   print *,'nvars=',dset%nvars
@@ -31,9 +31,9 @@ program test_read_netcdf
   !   call read_vardata_4d(dset, 'vgrd', values_4d)
   !   print *,minval(values_4d),maxval(values_4d)
   !endif
-  call read_vardata(dset, 'vgrd', values_1d)
+  call read_vardata(dset, 'vgrd', values_4d)
   print *,minval(values_4d),maxval(values_4d)
-  !call read_vardata(dset, 'pfull', values8_1d)
-  !print *,minval(values8_1d),maxval(values8_1d)
+  call read_vardata(dset, 'pfull', values8_1d)
+  print *,minval(values8_1d),maxval(values8_1d)
   call destroy_dataset(dset)
 end program test_read_netcdf
