@@ -11,6 +11,7 @@ module module_read_netcdf
      integer varid
      integer ndims
      integer dtype
+     integer deflate_level
      character(len=nf90_max_name) :: name
      integer, allocatable, dimension(:) :: dimids 
      integer, allocatable, dimension(:) :: dimlens
@@ -120,22 +121,9 @@ module module_read_netcdf
        allocate(dset%variables(nvar)%dimids(dset%variables(nvar)%ndims))
        allocate(dset%variables(nvar)%dimlens(dset%variables(nvar)%ndims))
 
-! function nf90_inquire_variable(ncid, varid, name, xtype, ndims, dimids, nAtts, &
-!    contiguous, chunksizes, deflate_level, shuffle, fletcher32, endianness)
-! integer, intent(in) :: ncid, varid
-! character (len = *), optional, intent(out) :: name
-! integer, optional, intent(out) :: xtype, ndims
-! integer, dimension(:), optional, intent(out) :: dimids
-! integer, optional, intent(out) :: natts
-! logical, optional, intent(out) :: contiguous
-! integer, optional, dimension(:), intent(out) :: chunksizes
-! integer, optional, intent(out) :: deflate_level
-! logical, optional, intent(out) :: shuffle, fletcher32
-! integer, optional, intent(out) :: endianness
-! integer :: nf90_inquire_variable
-
        ncerr = nf90_inquire_variable(dset%ncid, nvar,&
-                                     dimids=dset%variables(nvar)%dimids)
+                                     dimids=dset%variables(nvar)%dimids,&
+                                     deflate_level=dset%variables(nvar)%deflate_level)
        call nccheck(ncerr)
        do ndim=1,dset%variables(nvar)%ndims
           do n=1,dset%ndims
