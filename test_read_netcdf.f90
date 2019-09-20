@@ -1,4 +1,6 @@
 program test_read_netcdf
+! ifort -traceback test_read_netcdf.f90 module_read_netcdf.o -L${NETCDF}/lib
+! -lnetcdf -lnetcdff
   use module_read_netcdf
   character(len=500) filename
   type(Dataset) :: dset
@@ -7,7 +9,7 @@ program test_read_netcdf
   real(4), allocatable, dimension(:,:) :: values_2d
   real(4), allocatable, dimension(:,:,:) :: values_3d
   real(4), allocatable, dimension(:,:,:,:) :: values_4d
-  integer ndim,nvar,ndims
+  integer ndim,nvar,ndims,ival
   filename='test_data/dynf000.nc'
   call create_dataset(filename, dset)
   print *,'ncid=',dset%ncid
@@ -21,16 +23,7 @@ program test_read_netcdf
   print *,'var',nvar,trim(dset%variables(nvar)%name),dset%variables(nvar)%ndims,dset%variables(nvar)%dimlens
   enddo
   ndims = get_vardim(dset,'vgrd') 
-  !if (ndims == 1) then
-  !   call read_vardata_1d(dset, 'vgrd', values_1d)
-  !else if (ndims == 2) then
-  !   call read_vardata_2d(dset, 'vgrd', values_2d)
-  !else if (ndims == 3) then
-  !   call read_vardata_3d(dset, 'vgrd', values_3d)
-  !else if (ndims == 4) then
-  !   call read_vardata_4d(dset, 'vgrd', values_4d)
-  !   print *,minval(values_4d),maxval(values_4d)
-  !endif
+  print *,'vgrd has ',ndims,' dims'
   call read_vardata(dset, 'vgrd', values_4d)
   print *,'min/max vgrd (4d)'
   print *,minval(values_4d),maxval(values_4d)
@@ -40,5 +33,11 @@ program test_read_netcdf
   print *,'min/max pfull (1d_r8)'
   call read_vardata(dset, 'pfull', values8_1d)
   print *,minval(values8_1d),maxval(values8_1d)
+  call read_attribute(dset,'max_abs_compression_error',r4val,'pressfc')
+  print *,'max_abs_compression_error for pressfc = ',r4val
+  call read_attribute(dset,'ncnsto',ival)
+  print *,'ncnsto =',ival
+  call read_attribute(dset,'ak',values_1d)
+  print *,'ak =',values_1d
   call destroy_dataset(dset)
 end program test_read_netcdf

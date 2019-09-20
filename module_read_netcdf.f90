@@ -1,4 +1,7 @@
 module module_read_netcdf
+! module for reading netcdf global lat/lon grid files output by FV3GFS
+
+! ifort -I${NETCDF}/include -c -traceback module_read_netcdf.f90
   use netcdf
 
   implicit none
@@ -36,8 +39,14 @@ module module_read_netcdf
       read_vardata_4d_r8
   end interface
 
+  interface read_attribute
+      module procedure read_attribute_r4_scalar, read_attribute_int_scalar,&
+      read_attribute_r8_scalar, read_attribute_r4_1d,&
+      read_attribute_int_1d, read_attribute_r8_1d
+  end interface
+
   public :: create_dataset, destroy_dataset, Dataset, Variable, Dimension
-  public :: read_vardata, get_vardim
+  public :: read_vardata, read_attribute, get_vardim, get_dimlen
 
   contains
 
@@ -62,6 +71,18 @@ module module_read_netcdf
     enddo
     get_vardim = dset%variables(nvar)%ndims
   end function get_vardim
+
+  integer function get_dimlen(dset, dimname)
+    type(Dataset), intent(in) :: dset
+    character(len=*), intent(in) :: dimname
+    integer ndim
+    do ndim=1,dset%ndims
+       if (trim(dset%dimensions(ndim)%name) == trim(dimname)) then 
+          exit
+       endif
+    enddo
+    get_dimlen = dset%dimensions(ndim)%len
+  end function get_dimlen
     
   subroutine create_dataset(filename, dset)
     implicit none
@@ -169,6 +190,7 @@ module module_read_netcdf
        stop "stopped"
     endif
     n1 = dset%variables(nvar)%dimlens(1)
+    if (allocated(values)) deallocate(values)
     allocate(values(n1))
     ncerr = nf90_get_var(dset%ncid, dset%variables(nvar)%varid, values)
     call nccheck(ncerr)
@@ -186,6 +208,7 @@ module module_read_netcdf
     endif
     n1 = dset%variables(nvar)%dimlens(1)
     n2 = dset%variables(nvar)%dimlens(2)
+    if (allocated(values)) deallocate(values)
     allocate(values(n1,n2))
     ncerr = nf90_get_var(dset%ncid, dset%variables(nvar)%varid, values)
     call nccheck(ncerr)
@@ -204,6 +227,7 @@ module module_read_netcdf
     n1 = dset%variables(nvar)%dimlens(1)
     n2 = dset%variables(nvar)%dimlens(2)
     n3 = dset%variables(nvar)%dimlens(3)
+    if (allocated(values)) deallocate(values)
     allocate(values(n1,n2,n3))
     ncerr = nf90_get_var(dset%ncid, dset%variables(nvar)%varid, values)
     call nccheck(ncerr)
@@ -223,6 +247,7 @@ module module_read_netcdf
     n2 = dset%variables(nvar)%dimlens(2)
     n3 = dset%variables(nvar)%dimlens(3)
     n4 = dset%variables(nvar)%dimlens(4)
+    if (allocated(values)) deallocate(values)
     allocate(values(n1,n2,n3,n4))
     ncerr = nf90_get_var(dset%ncid, dset%variables(nvar)%varid, values)
     call nccheck(ncerr)
@@ -239,6 +264,7 @@ module module_read_netcdf
        stop "stopped"
     endif
     n1 = dset%variables(nvar)%dimlens(1)
+    if (allocated(values)) deallocate(values)
     allocate(values(n1))
     ncerr = nf90_get_var(dset%ncid, dset%variables(nvar)%varid, values)
     call nccheck(ncerr)
@@ -256,6 +282,7 @@ module module_read_netcdf
     endif
     n1 = dset%variables(nvar)%dimlens(1)
     n2 = dset%variables(nvar)%dimlens(2)
+    if (allocated(values)) deallocate(values)
     allocate(values(n1,n2))
     ncerr = nf90_get_var(dset%ncid, dset%variables(nvar)%varid, values)
     call nccheck(ncerr)
@@ -274,6 +301,7 @@ module module_read_netcdf
     n1 = dset%variables(nvar)%dimlens(1)
     n2 = dset%variables(nvar)%dimlens(2)
     n3 = dset%variables(nvar)%dimlens(3)
+    if (allocated(values)) deallocate(values)
     allocate(values(n1,n2,n3))
     ncerr = nf90_get_var(dset%ncid, dset%variables(nvar)%varid, values)
     call nccheck(ncerr)
@@ -293,9 +321,118 @@ module module_read_netcdf
     n2 = dset%variables(nvar)%dimlens(2)
     n3 = dset%variables(nvar)%dimlens(3)
     n4 = dset%variables(nvar)%dimlens(4)
+    if (allocated(values)) deallocate(values)
     allocate(values(n1,n2,n3,n4))
     ncerr = nf90_get_var(dset%ncid, dset%variables(nvar)%varid, values)
     call nccheck(ncerr)
   end subroutine read_vardata_4d_r8
+
+  subroutine read_attribute_int_scalar(dset, attname, values, varname)
+    type(Dataset), intent(in) :: dset
+    integer, intent(inout) :: values
+    character(len=*), intent(in), optional :: varname
+    character(len=*), intent(in) :: attname
+    integer ncerr, varid, nvar
+    if(present(varname))then
+        nvar = nvar_(dset,varname)
+        varid = dset%variables(nvar)%varid
+    else
+        varid = NF90_GLOBAL
+    endif 
+    ncerr = nf90_get_att(dset%ncid, varid, trim(attname), values)
+    call nccheck(ncerr)
+  end subroutine read_attribute_int_scalar
+
+  subroutine read_attribute_r4_scalar(dset, attname, values, varname)
+    type(Dataset), intent(in) :: dset
+    real(4), intent(inout) :: values
+    character(len=*), intent(in), optional :: varname
+    character(len=*), intent(in) :: attname
+    integer ncerr, varid, nvar
+    if(present(varname))then
+        nvar = nvar_(dset,varname)
+        varid = dset%variables(nvar)%varid
+    else
+        varid = NF90_GLOBAL
+    endif 
+    ncerr = nf90_get_att(dset%ncid, varid, trim(attname), values)
+    call nccheck(ncerr)
+  end subroutine read_attribute_r4_scalar
+
+  subroutine read_attribute_r8_scalar(dset, attname, values, varname)
+    type(Dataset), intent(in) :: dset
+    real(8), intent(inout) :: values
+    character(len=*), intent(in), optional :: varname
+    character(len=*), intent(in) :: attname
+    integer ncerr, varid, nvar
+    if(present(varname))then
+        nvar = nvar_(dset,varname)
+        varid = dset%variables(nvar)%varid
+    else
+        varid = NF90_GLOBAL
+    endif 
+    ncerr = nf90_get_att(dset%ncid, varid, trim(attname), values)
+    call nccheck(ncerr)
+  end subroutine read_attribute_r8_scalar
+
+  subroutine read_attribute_r4_1d(dset, attname, values, varname)
+    type(Dataset), intent(in) :: dset
+    real(4), intent(inout), allocatable, dimension(:) :: values
+    character(len=*), intent(in), optional :: varname
+    character(len=*), intent(in) :: attname
+    integer ncerr, varid, nvar, nlen
+    if(present(varname))then
+        nvar = nvar_(dset,varname)
+        varid = dset%variables(nvar)%varid
+    else
+        varid = NF90_GLOBAL
+    endif 
+    ncerr = nf90_inquire_attribute(dset%ncid, varid, trim(attname), len=nlen)
+    call nccheck(ncerr)
+    if (allocated(values)) deallocate(values)
+    allocate(values(nlen))
+    ncerr = nf90_get_att(dset%ncid, varid, trim(attname), values)
+    call nccheck(ncerr)
+  end subroutine read_attribute_r4_1d
+
+  subroutine read_attribute_r8_1d(dset, attname, values, varname)
+    type(Dataset), intent(in) :: dset
+    real(8), intent(inout), allocatable, dimension(:) :: values
+    character(len=*), intent(in), optional :: varname
+    character(len=*), intent(in) :: attname
+    integer ncerr, varid, nvar, nlen
+    if(present(varname))then
+        nvar = nvar_(dset,varname)
+        varid = dset%variables(nvar)%varid
+    else
+        varid = NF90_GLOBAL
+    endif 
+    ncerr = nf90_inquire_attribute(dset%ncid, varid, attname, len=nlen)
+    call nccheck(ncerr)
+    if (allocated(values)) deallocate(values)
+    allocate(values(nlen))
+    ncerr = nf90_get_att(dset%ncid, varid, trim(attname), values)
+    call nccheck(ncerr)
+  end subroutine read_attribute_r8_1d
+
+  subroutine read_attribute_int_1d(dset, attname, values, varname)
+    type(Dataset), intent(in) :: dset
+    integer, intent(inout), allocatable, dimension(:) :: values
+    character(len=*), intent(in), optional :: varname
+    character(len=*), intent(in) :: attname
+    integer ncerr, varid, nvar, nlen
+    if(present(varname))then
+        nvar = nvar_(dset,varname)
+        varid = dset%variables(nvar)%varid
+    else
+        varid = NF90_GLOBAL
+    endif 
+    ncerr = nf90_inquire_attribute(dset%ncid, varid, attname, len=nlen)
+    call nccheck(ncerr)
+    if (allocated(values)) deallocate(values)
+    allocate(values(nlen))
+    ncerr = nf90_get_att(dset%ncid, varid, trim(attname), values)
+    call nccheck(ncerr)
+  end subroutine read_attribute_int_1d
 
 end module module_read_netcdf
