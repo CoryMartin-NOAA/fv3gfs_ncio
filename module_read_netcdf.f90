@@ -53,9 +53,9 @@ module module_read_netcdf
   contains
 
   subroutine nccheck(status)
+    ! check return code, print error message 
     implicit none
     integer, intent (in) :: status
-
     if (status /= nf90_noerr) then
       write(0,*) status, trim(nf90_strerror(status))
       stop "stopped"
@@ -63,6 +63,7 @@ module module_read_netcdf
   end subroutine nccheck
 
   integer function get_vardim(dset, varname)
+    ! return number of dimensions associated with variable
     type(Dataset), intent(in) :: dset
     character(len=*), intent(in) :: varname
     integer nvar
@@ -75,6 +76,7 @@ module module_read_netcdf
   end function get_vardim
 
   integer function get_dimlen(dset, dimname)
+    ! return length of dimension
     type(Dataset), intent(in) :: dset
     character(len=*), intent(in) :: dimname
     integer ndim
@@ -87,6 +89,7 @@ module module_read_netcdf
   end function get_dimlen
     
   subroutine create_dataset(filename, dset)
+    ! create dataset object for netcdf file 
     implicit none
     character(len=*), intent(in) :: filename
     character(len=nf90_max_name) :: dimname
@@ -139,6 +142,7 @@ module module_read_netcdf
   end subroutine create_dataset
  
   subroutine destroy_dataset(dset)
+    ! deallocate members of dataset object
     type(Dataset), intent(inout) :: dset
     integer ncerr, nvar
     ncerr = nf90_close(ncid=dset%ncid)
@@ -151,6 +155,7 @@ module module_read_netcdf
   end subroutine destroy_dataset
 
   integer function nvar_(dset,varname)
+    ! private function to get variable index given name
     type(Dataset), intent(in) :: dset
     character(len=*), intent(in) :: varname
     logical foundit
@@ -170,6 +175,10 @@ module module_read_netcdf
   end function nvar_
 
   subroutine read_vardata_1d_r4(dset, varname, values)
+    ! read all data from variable varname, return in it array values.
+    ! on input, values should be an allocatable array with the correct
+    ! with the correct number of dimensions.  If values is allocated,
+    ! it we deallocated and reallocated.
     type(Dataset), intent(in) :: dset
     character(len=*), intent(in) :: varname
     real(4), allocatable, dimension(:), intent(inout) :: values
@@ -187,6 +196,10 @@ module module_read_netcdf
   end subroutine read_vardata_1d_r4
 
   subroutine read_vardata_2d_r4(dset, varname, values)
+    ! read all data from variable varname, return in it array values.
+    ! on input, values should be an allocatable array with the correct
+    ! with the correct number of dimensions.  If values is allocated,
+    ! it we deallocated and reallocated.
     type(Dataset), intent(in) :: dset
     character(len=*), intent(in) :: varname
     real(4), allocatable, dimension(:,:), intent(inout) :: values
@@ -205,6 +218,10 @@ module module_read_netcdf
   end subroutine read_vardata_2d_r4
 
   subroutine read_vardata_3d_r4(dset, varname, values)
+    ! read all data from variable varname, return in it array values.
+    ! on input, values should be an allocatable array with the correct
+    ! with the correct number of dimensions.  If values is allocated,
+    ! it we deallocated and reallocated.
     type(Dataset), intent(in) :: dset
     character(len=*), intent(in) :: varname
     real(4), allocatable, dimension(:,:,:), intent(inout) :: values
@@ -224,6 +241,10 @@ module module_read_netcdf
   end subroutine read_vardata_3d_r4
 
   subroutine read_vardata_4d_r4(dset, varname, values)
+    ! read all data from variable varname, return in it array values.
+    ! on input, values should be an allocatable array with the correct
+    ! with the correct number of dimensions.  If values is allocated,
+    ! it we deallocated and reallocated.
     type(Dataset), intent(in) :: dset
     character(len=*), intent(in) :: varname
     real(4), allocatable, dimension(:,:,:,:), intent(inout) :: values
@@ -244,6 +265,10 @@ module module_read_netcdf
   end subroutine read_vardata_4d_r4
 
   subroutine read_vardata_1d_r8(dset, varname, values)
+    ! read all data from variable varname, return in it array values.
+    ! on input, values should be an allocatable array with the correct
+    ! with the correct number of dimensions.  If values is allocated,
+    ! it we deallocated and reallocated.
     type(Dataset), intent(in) :: dset
     character(len=*), intent(in) :: varname
     real(8), allocatable, dimension(:), intent(inout) :: values
@@ -261,6 +286,10 @@ module module_read_netcdf
   end subroutine read_vardata_1d_r8
 
   subroutine read_vardata_2d_r8(dset, varname, values)
+    ! read all data from variable varname, return in it array values.
+    ! on input, values should be an allocatable array with the correct
+    ! with the correct number of dimensions.  If values is allocated,
+    ! it we deallocated and reallocated.
     type(Dataset), intent(in) :: dset
     character(len=*), intent(in) :: varname
     real(8), allocatable, dimension(:,:), intent(inout) :: values
@@ -279,6 +308,10 @@ module module_read_netcdf
   end subroutine read_vardata_2d_r8
 
   subroutine read_vardata_3d_r8(dset, varname, values)
+    ! read all data from variable varname, return in it array values.
+    ! on input, values should be an allocatable array with the correct
+    ! with the correct number of dimensions.  If values is allocated,
+    ! it we deallocated and reallocated.
     type(Dataset), intent(in) :: dset
     character(len=*), intent(in) :: varname
     real(8), allocatable, dimension(:,:,:), intent(inout) :: values
@@ -298,6 +331,10 @@ module module_read_netcdf
   end subroutine read_vardata_3d_r8
 
   subroutine read_vardata_4d_r8(dset, varname, values)
+    ! read all data from variable varname, return in it array values.
+    ! on input, values should be an allocatable array with the correct
+    ! with the correct number of dimensions.  If values is allocated,
+    ! it we deallocated and reallocated.
     type(Dataset), intent(in) :: dset
     character(len=*), intent(in) :: varname
     real(8), allocatable, dimension(:,:,:,:), intent(inout) :: values
@@ -318,6 +355,11 @@ module module_read_netcdf
   end subroutine read_vardata_4d_r8
 
   subroutine read_attribute_int_scalar(dset, attname, values, varname)
+    ! read attribute 'attname' return in 'values'.  If optional
+    ! argument 'varname' is given, an variable attribute is returned.
+    ! if the attribute is an 1d array, values should be an allocatable 1d
+    ! array of the correct type. if values is allocated, it be deallocated
+    ! and reallocated.
     type(Dataset), intent(in) :: dset
     integer, intent(inout) :: values
     character(len=*), intent(in), optional :: varname
@@ -350,6 +392,11 @@ module module_read_netcdf
   end subroutine read_attribute_r4_scalar
 
   subroutine read_attribute_r8_scalar(dset, attname, values, varname)
+    ! read attribute 'attname' return in 'values'.  If optional
+    ! argument 'varname' is given, an variable attribute is returned.
+    ! if the attribute is an 1d array, values should be an allocatable 1d
+    ! array of the correct type. if values is allocated, it be deallocated
+    ! and reallocated.
     type(Dataset), intent(in) :: dset
     real(8), intent(inout) :: values
     character(len=*), intent(in), optional :: varname
@@ -366,6 +413,11 @@ module module_read_netcdf
   end subroutine read_attribute_r8_scalar
 
   subroutine read_attribute_r4_1d(dset, attname, values, varname)
+    ! read attribute 'attname' return in 'values'.  If optional
+    ! argument 'varname' is given, an variable attribute is returned.
+    ! if the attribute is an 1d array, values should be an allocatable 1d
+    ! array of the correct type. if values is allocated, it be deallocated
+    ! and reallocated.
     type(Dataset), intent(in) :: dset
     real(4), intent(inout), allocatable, dimension(:) :: values
     character(len=*), intent(in), optional :: varname
@@ -386,6 +438,11 @@ module module_read_netcdf
   end subroutine read_attribute_r4_1d
 
   subroutine read_attribute_r8_1d(dset, attname, values, varname)
+    ! read attribute 'attname' return in 'values'.  If optional
+    ! argument 'varname' is given, an variable attribute is returned.
+    ! if the attribute is an 1d array, values should be an allocatable 1d
+    ! array of the correct type. if values is allocated, it be deallocated
+    ! and reallocated.
     type(Dataset), intent(in) :: dset
     real(8), intent(inout), allocatable, dimension(:) :: values
     character(len=*), intent(in), optional :: varname
@@ -406,6 +463,11 @@ module module_read_netcdf
   end subroutine read_attribute_r8_1d
 
   subroutine read_attribute_int_1d(dset, attname, values, varname)
+    ! read attribute 'attname' return in 'values'.  If optional
+    ! argument 'varname' is given, an variable attribute is returned.
+    ! if the attribute is an 1d array, values should be an allocatable 1d
+    ! array of the correct type. if values is allocated, it be deallocated
+    ! and reallocated.
     type(Dataset), intent(in) :: dset
     integer, intent(inout), allocatable, dimension(:) :: values
     character(len=*), intent(in), optional :: varname
