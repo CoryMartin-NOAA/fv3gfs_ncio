@@ -12,6 +12,7 @@ module module_read_netcdf
      integer ndims
      integer dtype
      integer deflate_level
+     logical shuffle
      character(len=nf90_max_name) :: name
      integer, allocatable, dimension(:) :: dimids 
      integer, allocatable, dimension(:) :: dimlens
@@ -123,7 +124,8 @@ module module_read_netcdf
 
        ncerr = nf90_inquire_variable(dset%ncid, nvar,&
                                      dimids=dset%variables(nvar)%dimids,&
-                                     deflate_level=dset%variables(nvar)%deflate_level)
+                                     deflate_level=dset%variables(nvar)%deflate_level,&
+                                     shuffle=dset%variables(nvar)%shuffle)
        call nccheck(ncerr)
        do ndim=1,dset%variables(nvar)%ndims
           do n=1,dset%ndims
