@@ -11,6 +11,7 @@ module module_fv3gfs_ncio
      integer varid
      integer ndims
      integer dtype
+     integer natts
      integer deflate_level
      logical shuffle
      character(len=nf90_max_name) :: name
@@ -28,7 +29,7 @@ module module_fv3gfs_ncio
      integer :: ncid
      integer :: nvars
      integer :: ndims
-     integer :: ngatts
+     integer :: natts
      integer :: nunlimdim
      character(len=500) filename
      type(Variable), allocatable, dimension(:) :: variables
@@ -100,7 +101,7 @@ module module_fv3gfs_ncio
     ! open netcdf file, get info, populate Dataset object.
     ncerr = nf90_open(trim(filename), NF90_NOWRITE, ncid=dset%ncid)
     call nccheck(ncerr)
-    ncerr = nf90_inquire(dset%ncid, dset%ndims, dset%nvars, dset%ngatts, nunlimdim)
+    ncerr = nf90_inquire(dset%ncid, dset%ndims, dset%nvars, dset%natts, nunlimdim)
     call nccheck(ncerr)
     dset%filename = trim(filename)
     allocate(dset%variables(dset%nvars))
@@ -120,6 +121,7 @@ module module_fv3gfs_ncio
        dset%variables(nvar)%varid = nvar
        ncerr = nf90_inquire_variable(dset%ncid, nvar,&
                                      name=dset%variables(nvar)%name,&
+                                     natts=dset%variables(nvar)%natts,&
                                      xtype=dset%variables(nvar)%dtype,&
                                      ndims=dset%variables(nvar)%ndims)
        call nccheck(ncerr)
@@ -159,13 +161,13 @@ module module_fv3gfs_ncio
             ncid=dset%ncid)
     call nccheck(ncerr)
     ! copy global attributes
-    do natt=1,dsetin%ngatts
+    do natt=1,dsetin%natts
        ncerr = nf90_inq_attname(dsetin%ncid, NF90_GLOBAL, natt, attname)
        call nccheck(ncerr)
        ncerr = nf90_copy_att(dsetin%ncid, NF90_GLOBAL, attname, dset%ncid, NF90_GLOBAL)
        call nccheck(ncerr)
     enddo
-    dset%ngatts = dsetin%ngatts
+    dset%natts = dsetin%natts
     dset%filename = trim(filename)
     dset%ndims = dsetin%ndims
     allocate(dset%variables(dsetin%nvars))
@@ -229,6 +231,13 @@ module module_fv3gfs_ncio
           dset%variables(nvar)%deflate_level = &
           dsetin%variables(nvar)%deflate_level
        endif
+       ! copy variable attributes
+       do natt=1,dsetin%variables(nvar)%natts
+          ncerr = nf90_inq_attname(dsetin%ncid, dsetin%variables(nvar)%varid, natt, attname)
+          call nccheck(ncerr)
+          ncerr = nf90_copy_att(dsetin%ncid, dsetin%variables(nvar)%varid, attname, dset%ncid, dset%variables(nvar)%varid)
+          call nccheck(ncerr)
+       enddo
     enddo
   end subroutine create_dataset
  
