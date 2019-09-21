@@ -43,6 +43,13 @@ module module_fv3gfs_ncio
       read_vardata_3d_int, read_vardata_4d_int
   end interface
 
+  interface write_vardata
+      module procedure write_vardata_1d_r4, write_vardata_2d_r4, write_vardata_3d_r4,&
+      write_vardata_4d_r4, write_vardata_1d_r8, write_vardata_2d_r8, write_vardata_3d_r8,&
+      write_vardata_4d_r8, write_vardata_1d_int, write_vardata_2d_int, &
+      write_vardata_3d_int, write_vardata_4d_int
+  end interface
+
   interface read_attribute
       module procedure read_attribute_r4_scalar, read_attribute_int_scalar,&
       read_attribute_r8_scalar, read_attribute_r4_1d,&
@@ -145,16 +152,27 @@ module module_fv3gfs_ncio
     enddo
   end subroutine open_dataset
 
-  subroutine create_dataset(dsetin, filename, dset)
+  subroutine create_dataset(dsetin, filename, dset, copy_vardata)
     ! create new dataset, using an existing dataset object to define
     ! variables and dimensions.  
     implicit none
     character(len=*), intent(in) :: filename
-    character(len=nf90_max_name) :: dimname, attname
+    character(len=nf90_max_name) :: dimname, attname, varname
+    logical, intent(in), optional :: copy_vardata
     type(Dataset), intent(out) :: dset
     type(Dataset), intent(in) :: dsetin
     integer ncerr,ncid,nunlimdim
     integer ndim,nvar,n,ishuffle,natt
+    logical copyd
+    real(8), allocatable, dimension(:) :: values_1d
+    real(8), allocatable, dimension(:,:) :: values_2d
+    real(8), allocatable, dimension(:,:,:) :: values_3d
+    real(8), allocatable, dimension(:,:,:,:) :: values_4d
+    if (present(copy_vardata)) then
+       copyd = copy_vardata
+    else
+       copyd = .false.
+    endif
     ! create netcdf file
     ncerr = nf90_create(trim(filename), &
             cmode=IOR(IOR(NF90_CLOBBER,NF90_NETCDF4),NF90_CLASSIC_MODEL), &
@@ -170,6 +188,7 @@ module module_fv3gfs_ncio
     dset%natts = dsetin%natts
     dset%filename = trim(filename)
     dset%ndims = dsetin%ndims
+    dset%nvars = dsetin%nvars
     allocate(dset%variables(dsetin%nvars))
     allocate(dset%dimensions(dsetin%ndims))
     ! create dimensions
@@ -210,14 +229,14 @@ module module_fv3gfs_ncio
           dset%variables(nvar)%dimlens(ndim) = dset%dimensions(n)%len
           dset%variables(nvar)%dimnames(ndim) = dset%dimensions(n)%name
        enddo
+       dset%variables(nvar)%name = dsetin%variables(nvar)%name
+       dset%variables(nvar)%dtype = dsetin%variables(nvar)%dtype
        ncerr = nf90_def_var(dset%ncid, &
-                            trim(dsetin%variables(nvar)%name),&
-                            dsetin%variables(nvar)%dtype, &
+                            trim(dset%variables(nvar)%name),&
+                            dset%variables(nvar)%dtype, &
                             dset%variables(nvar)%dimids, &
                             dset%variables(nvar)%varid)
        call nccheck(ncerr)
-       dset%variables(nvar)%name = dsetin%variables(nvar)%name
-       dset%variables(nvar)%dtype = dsetin%variables(nvar)%dtype
        if (dsetin%variables(nvar)%deflate_level > 0) then
           if (dsetin%variables(nvar)%shuffle) then
             ishuffle=1
@@ -239,6 +258,28 @@ module module_fv3gfs_ncio
           call nccheck(ncerr)
        enddo
     enddo
+    ncerr = nf90_enddef(dset%ncid)
+    call nccheck(ncerr)
+    if (copyd) then
+       ! if desired, copy variable data
+       ! assumes data is real (32 or 64 bit), and 1-4d.
+       do nvar=1,dsetin%nvars
+          varname = trim(dsetin%variables(nvar)%name)
+          if (dsetin%variables(nvar)%ndims == 1) then
+             call read_vardata(dsetin, varname, values_1d)
+             call write_vardata(dset, varname, values_1d)
+          else if (dsetin%variables(nvar)%ndims == 2) then
+             call read_vardata(dsetin, varname, values_2d)
+             call write_vardata(dset, varname, values_2d)
+          else if (dsetin%variables(nvar)%ndims == 3) then
+             call read_vardata(dsetin, varname, values_3d)
+             call write_vardata(dset, varname, values_3d)
+          else if (dsetin%variables(nvar)%ndims == 4) then
+             call read_vardata(dsetin, varname, values_4d)
+             call write_vardata(dset, varname, values_4d)
+          endif
+       enddo
+    endif
   end subroutine create_dataset
  
   subroutine destroy_dataset(dset)
@@ -334,6 +375,66 @@ module module_fv3gfs_ncio
     integer, allocatable, dimension(:,:,:,:), intent(inout) :: values
     include "read_vardata_code_4d.f90"
   end subroutine read_vardata_4d_int
+
+  subroutine write_vardata_1d_r4(dset, varname, values)
+    real(4),  dimension(:), intent(in) :: values
+    include "write_vardata_code.f90"
+  end subroutine write_vardata_1d_r4
+
+  subroutine write_vardata_2d_r4(dset, varname, values)
+    real(4),  dimension(:,:), intent(in) :: values
+    include "write_vardata_code.f90"
+  end subroutine write_vardata_2d_r4
+
+  subroutine write_vardata_3d_r4(dset, varname, values)
+    real(4),  dimension(:,:,:), intent(in) :: values
+    include "write_vardata_code.f90"
+  end subroutine write_vardata_3d_r4
+
+  subroutine write_vardata_4d_r4(dset, varname, values)
+    real(4),  dimension(:,:,:,:), intent(in) :: values
+    include "write_vardata_code.f90"
+  end subroutine write_vardata_4d_r4
+
+  subroutine write_vardata_1d_r8(dset, varname, values)
+    real(8),  dimension(:), intent(in) :: values
+    include "write_vardata_code.f90"
+  end subroutine write_vardata_1d_r8
+
+  subroutine write_vardata_2d_r8(dset, varname, values)
+    real(8),  dimension(:,:), intent(in) :: values
+    include "write_vardata_code.f90"
+  end subroutine write_vardata_2d_r8
+
+  subroutine write_vardata_3d_r8(dset, varname, values)
+    real(8),  dimension(:,:,:), intent(in) :: values
+    include "write_vardata_code.f90"
+  end subroutine write_vardata_3d_r8
+
+  subroutine write_vardata_4d_r8(dset, varname, values)
+    real(8),  dimension(:,:,:,:), intent(in) :: values
+    include "write_vardata_code.f90"
+  end subroutine write_vardata_4d_r8
+
+  subroutine write_vardata_1d_int(dset, varname, values)
+    integer,  dimension(:), intent(in) :: values
+    include "write_vardata_code.f90"
+  end subroutine write_vardata_1d_int
+
+  subroutine write_vardata_2d_int(dset, varname, values)
+    integer,  dimension(:,:), intent(in) :: values
+    include "write_vardata_code.f90"
+  end subroutine write_vardata_2d_int
+
+  subroutine write_vardata_3d_int(dset, varname, values)
+    integer,  dimension(:,:,:), intent(in) :: values
+    include "write_vardata_code.f90"
+  end subroutine write_vardata_3d_int
+
+  subroutine write_vardata_4d_int(dset, varname, values)
+    integer,  dimension(:,:,:,:), intent(in) :: values
+    include "write_vardata_code.f90"
+  end subroutine write_vardata_4d_int
 
   subroutine read_attribute_int_scalar(dset, attname, values, varname)
     integer, intent(inout) :: values
