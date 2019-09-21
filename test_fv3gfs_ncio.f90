@@ -42,6 +42,6 @@ program test_fv3gfs_ncio
 ! create a copy of the dataset
   filename='test_data/dynf000_copy.nc'
   call create_dataset(dset, filename, dsetout, copy_vardata=.true.)
-  call destroy_dataset(dset)
-  call destroy_dataset(dsetout)
+  call close_dataset(dset)
+  call close_dataset(dsetout)
 end program test_fv3gfs_ncio

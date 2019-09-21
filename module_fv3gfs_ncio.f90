@@ -56,7 +56,7 @@ module module_fv3gfs_ncio
       read_attribute_int_1d, read_attribute_r8_1d
   end interface
 
-  public :: open_dataset, create_dataset, destroy_dataset, Dataset, Variable, Dimension
+  public :: open_dataset, create_dataset, close_dataset, Dataset, Variable, Dimension
   public :: read_vardata, read_attribute, get_vardim, get_dimlen
 
   contains
@@ -307,7 +307,7 @@ module module_fv3gfs_ncio
     endif
   end subroutine create_dataset
  
-  subroutine destroy_dataset(dset)
+  subroutine close_dataset(dset)
     ! deallocate members of dataset object
     type(Dataset), intent(inout) :: dset
     integer ncerr, nvar
@@ -319,7 +319,7 @@ module module_fv3gfs_ncio
        deallocate(dset%variables(nvar)%dimnames)
     enddo
     deallocate(dset%variables,dset%dimensions)
-  end subroutine destroy_dataset
+  end subroutine close_dataset
 
   integer function nvar_(dset,varname)
     ! private function to get variable index given name
