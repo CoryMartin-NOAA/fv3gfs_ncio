@@ -3,7 +3,7 @@ program test_read_netcdf
 ! -lnetcdf -lnetcdff
   use module_read_netcdf
   character(len=500) filename
-  type(Dataset) :: dset
+  type(Dataset) :: dset, dsetout
   real(4), allocatable, dimension(:) :: values_1d
   real(8), allocatable, dimension(:) :: values8_1d
   real(4), allocatable, dimension(:,:) :: values_2d
@@ -11,7 +11,7 @@ program test_read_netcdf
   real(4), allocatable, dimension(:,:,:,:) :: values_4d
   integer ndim,nvar,ndims,ival
   filename='test_data/dynf000.nc'
-  call create_dataset(filename, dset)
+  call open_dataset(filename, dset)
   print *,'ncid=',dset%ncid
   print *,'nvars=',dset%nvars
   print *,'ndims=',dset%ndims
@@ -39,5 +39,9 @@ program test_read_netcdf
   print *,'ncnsto =',ival
   call read_attribute(dset,'ak',values_1d)
   print *,'ak =',values_1d
+! create a copy of the dataset
+  filename='test_data/dynf000_copy.nc'
+  call create_dataset(dset, filename, dsetout)
   call destroy_dataset(dset)
+  call destroy_dataset(dsetout)
 end program test_read_netcdf

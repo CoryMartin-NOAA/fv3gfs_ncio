@@ -15,6 +15,7 @@ module module_read_netcdf
      logical shuffle
      character(len=nf90_max_name) :: name
      integer, allocatable, dimension(:) :: dimids 
+     character(len=nf90_max_name), allocatable, dimension(:) :: dimnames 
      integer, allocatable, dimension(:) :: dimlens
   end type Variable   
   type Dimension 
@@ -47,7 +48,7 @@ module module_read_netcdf
       read_attribute_int_1d, read_attribute_r8_1d
   end interface
 
-  public :: create_dataset, destroy_dataset, Dataset, Variable, Dimension
+  public :: open_dataset, create_dataset, destroy_dataset, Dataset, Variable, Dimension
   public :: read_vardata, read_attribute, get_vardim, get_dimlen
 
   contains
@@ -88,8 +89,8 @@ module module_read_netcdf
     get_dimlen = dset%dimensions(ndim)%len
   end function get_dimlen
     
-  subroutine create_dataset(filename, dset)
-    ! create dataset object for netcdf file 
+  subroutine open_dataset(filename, dset)
+    ! open existing dataset, create dataset object for netcdf file 
     implicit none
     character(len=*), intent(in) :: filename
     character(len=nf90_max_name) :: dimname
@@ -108,12 +109,12 @@ module module_read_netcdf
        dset%dimensions(ndim)%dimid = ndim
        ncerr = nf90_inquire_dimension(dset%ncid, ndim, name=dset%dimensions(ndim)%name, &
                                       len=dset%dimensions(ndim)%len)
+       call nccheck(ncerr)
        if (ndim == nunlimdim) then
           dset%dimensions(ndim)%isunlimited = .true.
        else
           dset%dimensions(ndim)%isunlimited = .false.
        endif
-       call nccheck(ncerr)
     enddo
     do nvar=1,dset%nvars
        dset%variables(nvar)%varid = nvar
@@ -124,7 +125,7 @@ module module_read_netcdf
        call nccheck(ncerr)
        allocate(dset%variables(nvar)%dimids(dset%variables(nvar)%ndims))
        allocate(dset%variables(nvar)%dimlens(dset%variables(nvar)%ndims))
-
+       allocate(dset%variables(nvar)%dimnames(dset%variables(nvar)%ndims))
        ncerr = nf90_inquire_variable(dset%ncid, nvar,&
                                      dimids=dset%variables(nvar)%dimids,&
                                      deflate_level=dset%variables(nvar)%deflate_level,&
@@ -137,7 +138,89 @@ module module_read_netcdf
             endif
           enddo
           dset%variables(nvar)%dimlens(ndim) = dset%dimensions(n)%len
+          dset%variables(nvar)%dimnames(ndim) = dset%dimensions(n)%name
        enddo
+    enddo
+  end subroutine open_dataset
+
+  subroutine create_dataset(dsetin, filename, dset)
+    ! create new dataset, using an existing dataset object to define
+    ! variables and dimensions.  
+    implicit none
+    character(len=*), intent(in) :: filename
+    character(len=nf90_max_name) :: dimname
+    type(Dataset), intent(out) :: dset
+    type(Dataset), intent(in) :: dsetin
+    integer ncerr,ncid,nunlimdim
+    integer ndim,nvar,n,ishuffle
+    ! create netcdf file
+    ncerr = nf90_create(trim(filename), &
+            cmode=IOR(IOR(NF90_CLOBBER,NF90_NETCDF4),NF90_CLASSIC_MODEL), &
+            ncid=dset%ncid)
+    call nccheck(ncerr)
+    dset%filename = trim(filename)
+    dset%ndims = dsetin%ndims
+    allocate(dset%variables(dsetin%nvars))
+    allocate(dset%dimensions(dsetin%ndims))
+    ! create dimensions
+    do ndim=1,dsetin%ndims
+       if (dsetin%dimensions(ndim)%isunlimited) then
+          ncerr = nf90_def_dim(dset%ncid, trim(dsetin%dimensions(ndim)%name), &
+                  NF90_UNLIMITED, &
+                  dset%dimensions(ndim)%dimid)
+          call nccheck(ncerr)
+          dset%dimensions(ndim)%isunlimited = .true.
+          dset%nunlimdim = ndim
+          dset%dimensions(ndim)%len = 0
+          dset%dimensions(ndim)%name = trim(dsetin%dimensions(ndim)%name)
+       else
+          ncerr = nf90_def_dim(dset%ncid, trim(dsetin%dimensions(ndim)%name),&
+                  dsetin%dimensions(ndim)%len, &
+                  dset%dimensions(ndim)%dimid)
+          call nccheck(ncerr)
+          dset%dimensions(ndim)%len = dsetin%dimensions(ndim)%len
+          dset%dimensions(ndim)%isunlimited = .false.
+          dset%dimensions(ndim)%name = trim(dsetin%dimensions(ndim)%name)
+       endif
+    enddo
+    ! create variables
+    do nvar=1,dsetin%nvars
+       dset%variables(nvar)%ndims = dsetin%variables(nvar)%ndims
+       allocate(dset%variables(nvar)%dimids(dset%variables(nvar)%ndims))
+       allocate(dset%variables(nvar)%dimnames(dset%variables(nvar)%ndims))
+       allocate(dset%variables(nvar)%dimlens(dset%variables(nvar)%ndims))
+       do ndim=1,dset%variables(nvar)%ndims
+          do n=1,dset%ndims
+            if (trim(dsetin%variables(nvar)%dimnames(ndim)) == &
+                trim(dset%dimensions(n)%name)) then
+               exit
+            endif
+          enddo
+          dset%variables(nvar)%dimids(ndim) = dset%dimensions(n)%dimid
+          dset%variables(nvar)%dimlens(ndim) = dset%dimensions(n)%len
+          dset%variables(nvar)%dimnames(ndim) = dset%dimensions(n)%name
+       enddo
+       ncerr = nf90_def_var(dset%ncid, &
+                            trim(dsetin%variables(nvar)%name),&
+                            dsetin%variables(nvar)%dtype, &
+                            dset%variables(nvar)%dimids, &
+                            dset%variables(nvar)%varid)
+       call nccheck(ncerr)
+       dset%variables(nvar)%name = dsetin%variables(nvar)%name
+       dset%variables(nvar)%dtype = dsetin%variables(nvar)%dtype
+       if (dsetin%variables(nvar)%deflate_level > 0) then
+          if (dsetin%variables(nvar)%shuffle) then
+            ishuffle=1
+          else
+            ishuffle=0
+          endif
+          ncerr = nf90_def_var_deflate(dset%ncid, dset%variables(nvar)%varid,&
+                  ishuffle,1,dsetin%variables(nvar)%deflate_level)
+          call nccheck(ncerr)
+          dset%variables(nvar)%shuffle = dsetin%variables(nvar)%shuffle
+          dset%variables(nvar)%deflate_level = &
+          dsetin%variables(nvar)%deflate_level
+       endif
     enddo
   end subroutine create_dataset
  
@@ -150,6 +233,7 @@ module module_read_netcdf
     do nvar=1,dset%nvars
        deallocate(dset%variables(nvar)%dimids)
        deallocate(dset%variables(nvar)%dimlens)
+       deallocate(dset%variables(nvar)%dimnames)
     enddo
     deallocate(dset%variables,dset%dimensions)
   end subroutine destroy_dataset
