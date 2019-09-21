@@ -37,7 +37,8 @@ module module_read_netcdf
   interface read_vardata
       module procedure read_vardata_1d_r4, read_vardata_2d_r4, read_vardata_3d_r4,&
       read_vardata_4d_r4, read_vardata_1d_r8, read_vardata_2d_r8, read_vardata_3d_r8,&
-      read_vardata_4d_r8
+      read_vardata_4d_r8, read_vardata_1d_int, read_vardata_2d_int, &
+      read_vardata_3d_int, read_vardata_4d_int
   end interface
 
   interface read_attribute
@@ -175,72 +176,92 @@ module module_read_netcdf
 
   subroutine read_vardata_1d_r4(dset, varname, values)
     real(4), allocatable, dimension(:), intent(inout) :: values
-   include "read_vardata_code_1d.f90"
+    include "read_vardata_code_1d.f90"
   end subroutine read_vardata_1d_r4
 
   subroutine read_vardata_2d_r4(dset, varname, values)
     real(4), allocatable, dimension(:,:), intent(inout) :: values
-   include "read_vardata_code_2d.f90"
+    include "read_vardata_code_2d.f90"
   end subroutine read_vardata_2d_r4
 
   subroutine read_vardata_3d_r4(dset, varname, values)
     real(4), allocatable, dimension(:,:,:), intent(inout) :: values
-   include "read_vardata_code_3d.f90"
+    include "read_vardata_code_3d.f90"
   end subroutine read_vardata_3d_r4
 
   subroutine read_vardata_4d_r4(dset, varname, values)
     real(4), allocatable, dimension(:,:,:,:), intent(inout) :: values
-   include "read_vardata_code_4d.f90"
+    include "read_vardata_code_4d.f90"
   end subroutine read_vardata_4d_r4
 
   subroutine read_vardata_1d_r8(dset, varname, values)
     real(8), allocatable, dimension(:), intent(inout) :: values
-   include "read_vardata_code_1d.f90"
+    include "read_vardata_code_1d.f90"
   end subroutine read_vardata_1d_r8
 
   subroutine read_vardata_2d_r8(dset, varname, values)
     real(8), allocatable, dimension(:,:), intent(inout) :: values
-   include "read_vardata_code_2d.f90"
+    include "read_vardata_code_2d.f90"
   end subroutine read_vardata_2d_r8
 
   subroutine read_vardata_3d_r8(dset, varname, values)
     real(8), allocatable, dimension(:,:,:), intent(inout) :: values
-   include "read_vardata_code_3d.f90"
+    include "read_vardata_code_3d.f90"
   end subroutine read_vardata_3d_r8
 
   subroutine read_vardata_4d_r8(dset, varname, values)
     real(8), allocatable, dimension(:,:,:,:), intent(inout) :: values
-   include "read_vardata_code_4d.f90"
+    include "read_vardata_code_4d.f90"
   end subroutine read_vardata_4d_r8
+
+  subroutine read_vardata_1d_int(dset, varname, values)
+    integer, allocatable, dimension(:), intent(inout) :: values
+    include "read_vardata_code_1d.f90"
+  end subroutine read_vardata_1d_int
+
+  subroutine read_vardata_2d_int(dset, varname, values)
+    integer, allocatable, dimension(:,:), intent(inout) :: values
+    include "read_vardata_code_2d.f90"
+  end subroutine read_vardata_2d_int
+
+  subroutine read_vardata_3d_int(dset, varname, values)
+    integer, allocatable, dimension(:,:,:), intent(inout) :: values
+    include "read_vardata_code_3d.f90"
+  end subroutine read_vardata_3d_int
+
+  subroutine read_vardata_4d_int(dset, varname, values)
+    integer, allocatable, dimension(:,:,:,:), intent(inout) :: values
+    include "read_vardata_code_4d.f90"
+  end subroutine read_vardata_4d_int
 
   subroutine read_attribute_int_scalar(dset, attname, values, varname)
     integer, intent(inout) :: values
-   include "read_scalar_attribute_code.f90"
+    include "read_scalar_attribute_code.f90"
   end subroutine read_attribute_int_scalar
 
   subroutine read_attribute_r4_scalar(dset, attname, values, varname)
     real(4), intent(inout) :: values
-   include "read_scalar_attribute_code.f90"
+    include "read_scalar_attribute_code.f90"
   end subroutine read_attribute_r4_scalar
 
   subroutine read_attribute_r8_scalar(dset, attname, values, varname)
     real(8), intent(inout) :: values
-   include "read_scalar_attribute_code.f90"
+    include "read_scalar_attribute_code.f90"
   end subroutine read_attribute_r8_scalar
 
   subroutine read_attribute_r4_1d(dset, attname, values, varname)
     real(4), intent(inout), allocatable, dimension(:) :: values
-   include "read_attribute_code.f90"
+    include "read_attribute_code.f90"
   end subroutine read_attribute_r4_1d
 
   subroutine read_attribute_r8_1d(dset, attname, values, varname)
     real(8), intent(inout), allocatable, dimension(:) :: values
-   include "read_attribute_code.f90"
+    include "read_attribute_code.f90"
   end subroutine read_attribute_r8_1d
 
   subroutine read_attribute_int_1d(dset, attname, values, varname)
     integer, intent(inout), allocatable, dimension(:) :: values
-   include "read_attribute_code.f90"
+    include "read_attribute_code.f90"
   end subroutine read_attribute_int_1d
 
 end module module_read_netcdf
