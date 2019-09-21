@@ -1,7 +1,7 @@
 module module_read_netcdf
 ! module for reading netcdf global lat/lon grid files output by FV3GFS
 
-! ifort -I${NETCDF}/include -c -traceback module_read_netcdf.f90
+! ifort -I${NETCDF}include -c -traceback module_read_netcdf.f90
   use netcdf
 
   implicit none
@@ -36,8 +36,7 @@ module module_read_netcdf
 
   interface read_vardata
       module procedure read_vardata_1d_r4, read_vardata_2d_r4, read_vardata_3d_r4,&
-      read_vardata_4d_r4, &
-      read_vardata_1d_r8, read_vardata_2d_r8, read_vardata_3d_r8,&
+      read_vardata_4d_r4, read_vardata_1d_r8, read_vardata_2d_r8, read_vardata_3d_r8,&
       read_vardata_4d_r8
   end interface
 
@@ -175,316 +174,73 @@ module module_read_netcdf
   end function nvar_
 
   subroutine read_vardata_1d_r4(dset, varname, values)
-    ! read all data from variable varname, return in it array values.
-    ! on input, values should be an allocatable array with the correct
-    ! with the correct number of dimensions.  If values is allocated,
-    ! it we deallocated and reallocated.
-    type(Dataset), intent(in) :: dset
-    character(len=*), intent(in) :: varname
     real(4), allocatable, dimension(:), intent(inout) :: values
-    integer ncerr, nvar, n1, ndim
-    nvar = nvar_(dset,varname)
-    if (dset%variables(nvar)%ndims /= 1) then
-       print *,'rank of data array does not match number of variable dims'
-       stop "stopped"
-    endif
-    n1 = dset%variables(nvar)%dimlens(1)
-    if (allocated(values)) deallocate(values)
-    allocate(values(n1))
-    ncerr = nf90_get_var(dset%ncid, dset%variables(nvar)%varid, values)
-    call nccheck(ncerr)
+   include "read_vardata_code_1d.f90"
   end subroutine read_vardata_1d_r4
 
   subroutine read_vardata_2d_r4(dset, varname, values)
-    ! read all data from variable varname, return in it array values.
-    ! on input, values should be an allocatable array with the correct
-    ! with the correct number of dimensions.  If values is allocated,
-    ! it we deallocated and reallocated.
-    type(Dataset), intent(in) :: dset
-    character(len=*), intent(in) :: varname
     real(4), allocatable, dimension(:,:), intent(inout) :: values
-    integer ncerr, nvar, n1,n2, ndim
-    nvar = nvar_(dset,varname)
-    if (dset%variables(nvar)%ndims /= 2) then
-       print *,'rank of data array does not match number of variable dims'
-       stop "stopped"
-    endif
-    n1 = dset%variables(nvar)%dimlens(1)
-    n2 = dset%variables(nvar)%dimlens(2)
-    if (allocated(values)) deallocate(values)
-    allocate(values(n1,n2))
-    ncerr = nf90_get_var(dset%ncid, dset%variables(nvar)%varid, values)
-    call nccheck(ncerr)
+   include "read_vardata_code_2d.f90"
   end subroutine read_vardata_2d_r4
 
   subroutine read_vardata_3d_r4(dset, varname, values)
-    ! read all data from variable varname, return in it array values.
-    ! on input, values should be an allocatable array with the correct
-    ! with the correct number of dimensions.  If values is allocated,
-    ! it we deallocated and reallocated.
-    type(Dataset), intent(in) :: dset
-    character(len=*), intent(in) :: varname
     real(4), allocatable, dimension(:,:,:), intent(inout) :: values
-    integer ncerr, nvar, n1,n2,n3, ndim
-    nvar = nvar_(dset,varname)
-    if (dset%variables(nvar)%ndims /= 3) then
-       print *,'rank of data array does not match number of variable dims'
-       stop "stopped"
-    endif
-    n1 = dset%variables(nvar)%dimlens(1)
-    n2 = dset%variables(nvar)%dimlens(2)
-    n3 = dset%variables(nvar)%dimlens(3)
-    if (allocated(values)) deallocate(values)
-    allocate(values(n1,n2,n3))
-    ncerr = nf90_get_var(dset%ncid, dset%variables(nvar)%varid, values)
-    call nccheck(ncerr)
+   include "read_vardata_code_3d.f90"
   end subroutine read_vardata_3d_r4
 
   subroutine read_vardata_4d_r4(dset, varname, values)
-    ! read all data from variable varname, return in it array values.
-    ! on input, values should be an allocatable array with the correct
-    ! with the correct number of dimensions.  If values is allocated,
-    ! it we deallocated and reallocated.
-    type(Dataset), intent(in) :: dset
-    character(len=*), intent(in) :: varname
     real(4), allocatable, dimension(:,:,:,:), intent(inout) :: values
-    integer ncerr, nvar, n1,n2,n3,n4, ndim
-    nvar = nvar_(dset,varname)
-    if (dset%variables(nvar)%ndims /= 4) then
-       print *,'rank of data array does not match number of variable dims'
-       stop "stopped"
-    endif
-    n1 = dset%variables(nvar)%dimlens(1)
-    n2 = dset%variables(nvar)%dimlens(2)
-    n3 = dset%variables(nvar)%dimlens(3)
-    n4 = dset%variables(nvar)%dimlens(4)
-    if (allocated(values)) deallocate(values)
-    allocate(values(n1,n2,n3,n4))
-    ncerr = nf90_get_var(dset%ncid, dset%variables(nvar)%varid, values)
-    call nccheck(ncerr)
+   include "read_vardata_code_4d.f90"
   end subroutine read_vardata_4d_r4
 
   subroutine read_vardata_1d_r8(dset, varname, values)
-    ! read all data from variable varname, return in it array values.
-    ! on input, values should be an allocatable array with the correct
-    ! with the correct number of dimensions.  If values is allocated,
-    ! it we deallocated and reallocated.
-    type(Dataset), intent(in) :: dset
-    character(len=*), intent(in) :: varname
     real(8), allocatable, dimension(:), intent(inout) :: values
-    integer ncerr, nvar, n1, ndim
-    nvar = nvar_(dset,varname)
-    if (dset%variables(nvar)%ndims /= 1) then
-       print *,'rank of data array does not match number of variable dims'
-       stop "stopped"
-    endif
-    n1 = dset%variables(nvar)%dimlens(1)
-    if (allocated(values)) deallocate(values)
-    allocate(values(n1))
-    ncerr = nf90_get_var(dset%ncid, dset%variables(nvar)%varid, values)
-    call nccheck(ncerr)
+   include "read_vardata_code_1d.f90"
   end subroutine read_vardata_1d_r8
 
   subroutine read_vardata_2d_r8(dset, varname, values)
-    ! read all data from variable varname, return in it array values.
-    ! on input, values should be an allocatable array with the correct
-    ! with the correct number of dimensions.  If values is allocated,
-    ! it we deallocated and reallocated.
-    type(Dataset), intent(in) :: dset
-    character(len=*), intent(in) :: varname
     real(8), allocatable, dimension(:,:), intent(inout) :: values
-    integer ncerr, nvar, n1,n2, ndim
-    nvar = nvar_(dset,varname)
-    if (dset%variables(nvar)%ndims /= 2) then
-       print *,'rank of data array does not match number of variable dims'
-       stop "stopped"
-    endif
-    n1 = dset%variables(nvar)%dimlens(1)
-    n2 = dset%variables(nvar)%dimlens(2)
-    if (allocated(values)) deallocate(values)
-    allocate(values(n1,n2))
-    ncerr = nf90_get_var(dset%ncid, dset%variables(nvar)%varid, values)
-    call nccheck(ncerr)
+   include "read_vardata_code_2d.f90"
   end subroutine read_vardata_2d_r8
 
   subroutine read_vardata_3d_r8(dset, varname, values)
-    ! read all data from variable varname, return in it array values.
-    ! on input, values should be an allocatable array with the correct
-    ! with the correct number of dimensions.  If values is allocated,
-    ! it we deallocated and reallocated.
-    type(Dataset), intent(in) :: dset
-    character(len=*), intent(in) :: varname
     real(8), allocatable, dimension(:,:,:), intent(inout) :: values
-    integer ncerr, nvar, n1,n2,n3, ndim
-    nvar = nvar_(dset,varname)
-    if (dset%variables(nvar)%ndims /= 3) then
-       print *,'rank of data array does not match number of variable dims'
-       stop "stopped"
-    endif
-    n1 = dset%variables(nvar)%dimlens(1)
-    n2 = dset%variables(nvar)%dimlens(2)
-    n3 = dset%variables(nvar)%dimlens(3)
-    if (allocated(values)) deallocate(values)
-    allocate(values(n1,n2,n3))
-    ncerr = nf90_get_var(dset%ncid, dset%variables(nvar)%varid, values)
-    call nccheck(ncerr)
+   include "read_vardata_code_3d.f90"
   end subroutine read_vardata_3d_r8
 
   subroutine read_vardata_4d_r8(dset, varname, values)
-    ! read all data from variable varname, return in it array values.
-    ! on input, values should be an allocatable array with the correct
-    ! with the correct number of dimensions.  If values is allocated,
-    ! it we deallocated and reallocated.
-    type(Dataset), intent(in) :: dset
-    character(len=*), intent(in) :: varname
     real(8), allocatable, dimension(:,:,:,:), intent(inout) :: values
-    integer ncerr, nvar, n1,n2,n3,n4, ndim
-    nvar = nvar_(dset,varname)
-    if (dset%variables(nvar)%ndims /= 4) then
-       print *,'rank of data array does not match number of variable dims'
-       stop "stopped"
-    endif
-    n1 = dset%variables(nvar)%dimlens(1)
-    n2 = dset%variables(nvar)%dimlens(2)
-    n3 = dset%variables(nvar)%dimlens(3)
-    n4 = dset%variables(nvar)%dimlens(4)
-    if (allocated(values)) deallocate(values)
-    allocate(values(n1,n2,n3,n4))
-    ncerr = nf90_get_var(dset%ncid, dset%variables(nvar)%varid, values)
-    call nccheck(ncerr)
+   include "read_vardata_code_4d.f90"
   end subroutine read_vardata_4d_r8
 
   subroutine read_attribute_int_scalar(dset, attname, values, varname)
-    ! read attribute 'attname' return in 'values'.  If optional
-    ! argument 'varname' is given, an variable attribute is returned.
-    ! if the attribute is an 1d array, values should be an allocatable 1d
-    ! array of the correct type. if values is allocated, it be deallocated
-    ! and reallocated.
-    type(Dataset), intent(in) :: dset
     integer, intent(inout) :: values
-    character(len=*), intent(in), optional :: varname
-    character(len=*), intent(in) :: attname
-    integer ncerr, varid, nvar
-    if(present(varname))then
-        nvar = nvar_(dset,varname)
-        varid = dset%variables(nvar)%varid
-    else
-        varid = NF90_GLOBAL
-    endif 
-    ncerr = nf90_get_att(dset%ncid, varid, trim(attname), values)
-    call nccheck(ncerr)
+   include "read_scalar_attribute_code.f90"
   end subroutine read_attribute_int_scalar
 
   subroutine read_attribute_r4_scalar(dset, attname, values, varname)
-    type(Dataset), intent(in) :: dset
     real(4), intent(inout) :: values
-    character(len=*), intent(in), optional :: varname
-    character(len=*), intent(in) :: attname
-    integer ncerr, varid, nvar
-    if(present(varname))then
-        nvar = nvar_(dset,varname)
-        varid = dset%variables(nvar)%varid
-    else
-        varid = NF90_GLOBAL
-    endif 
-    ncerr = nf90_get_att(dset%ncid, varid, trim(attname), values)
-    call nccheck(ncerr)
+   include "read_scalar_attribute_code.f90"
   end subroutine read_attribute_r4_scalar
 
   subroutine read_attribute_r8_scalar(dset, attname, values, varname)
-    ! read attribute 'attname' return in 'values'.  If optional
-    ! argument 'varname' is given, an variable attribute is returned.
-    ! if the attribute is an 1d array, values should be an allocatable 1d
-    ! array of the correct type. if values is allocated, it be deallocated
-    ! and reallocated.
-    type(Dataset), intent(in) :: dset
     real(8), intent(inout) :: values
-    character(len=*), intent(in), optional :: varname
-    character(len=*), intent(in) :: attname
-    integer ncerr, varid, nvar
-    if(present(varname))then
-        nvar = nvar_(dset,varname)
-        varid = dset%variables(nvar)%varid
-    else
-        varid = NF90_GLOBAL
-    endif 
-    ncerr = nf90_get_att(dset%ncid, varid, trim(attname), values)
-    call nccheck(ncerr)
+   include "read_scalar_attribute_code.f90"
   end subroutine read_attribute_r8_scalar
 
   subroutine read_attribute_r4_1d(dset, attname, values, varname)
-    ! read attribute 'attname' return in 'values'.  If optional
-    ! argument 'varname' is given, an variable attribute is returned.
-    ! if the attribute is an 1d array, values should be an allocatable 1d
-    ! array of the correct type. if values is allocated, it be deallocated
-    ! and reallocated.
-    type(Dataset), intent(in) :: dset
     real(4), intent(inout), allocatable, dimension(:) :: values
-    character(len=*), intent(in), optional :: varname
-    character(len=*), intent(in) :: attname
-    integer ncerr, varid, nvar, nlen
-    if(present(varname))then
-        nvar = nvar_(dset,varname)
-        varid = dset%variables(nvar)%varid
-    else
-        varid = NF90_GLOBAL
-    endif 
-    ncerr = nf90_inquire_attribute(dset%ncid, varid, trim(attname), len=nlen)
-    call nccheck(ncerr)
-    if (allocated(values)) deallocate(values)
-    allocate(values(nlen))
-    ncerr = nf90_get_att(dset%ncid, varid, trim(attname), values)
-    call nccheck(ncerr)
+   include "read_attribute_code.f90"
   end subroutine read_attribute_r4_1d
 
   subroutine read_attribute_r8_1d(dset, attname, values, varname)
-    ! read attribute 'attname' return in 'values'.  If optional
-    ! argument 'varname' is given, an variable attribute is returned.
-    ! if the attribute is an 1d array, values should be an allocatable 1d
-    ! array of the correct type. if values is allocated, it be deallocated
-    ! and reallocated.
-    type(Dataset), intent(in) :: dset
     real(8), intent(inout), allocatable, dimension(:) :: values
-    character(len=*), intent(in), optional :: varname
-    character(len=*), intent(in) :: attname
-    integer ncerr, varid, nvar, nlen
-    if(present(varname))then
-        nvar = nvar_(dset,varname)
-        varid = dset%variables(nvar)%varid
-    else
-        varid = NF90_GLOBAL
-    endif 
-    ncerr = nf90_inquire_attribute(dset%ncid, varid, attname, len=nlen)
-    call nccheck(ncerr)
-    if (allocated(values)) deallocate(values)
-    allocate(values(nlen))
-    ncerr = nf90_get_att(dset%ncid, varid, trim(attname), values)
-    call nccheck(ncerr)
+   include "read_attribute_code.f90"
   end subroutine read_attribute_r8_1d
 
   subroutine read_attribute_int_1d(dset, attname, values, varname)
-    ! read attribute 'attname' return in 'values'.  If optional
-    ! argument 'varname' is given, an variable attribute is returned.
-    ! if the attribute is an 1d array, values should be an allocatable 1d
-    ! array of the correct type. if values is allocated, it be deallocated
-    ! and reallocated.
-    type(Dataset), intent(in) :: dset
     integer, intent(inout), allocatable, dimension(:) :: values
-    character(len=*), intent(in), optional :: varname
-    character(len=*), intent(in) :: attname
-    integer ncerr, varid, nvar, nlen
-    if(present(varname))then
-        nvar = nvar_(dset,varname)
-        varid = dset%variables(nvar)%varid
-    else
-        varid = NF90_GLOBAL
-    endif 
-    ncerr = nf90_inquire_attribute(dset%ncid, varid, attname, len=nlen)
-    call nccheck(ncerr)
-    if (allocated(values)) deallocate(values)
-    allocate(values(nlen))
-    ncerr = nf90_get_att(dset%ncid, varid, trim(attname), values)
-    call nccheck(ncerr)
+   include "read_attribute_code.f90"
   end subroutine read_attribute_int_1d
 
 end module module_read_netcdf
