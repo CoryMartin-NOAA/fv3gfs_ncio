@@ -15,7 +15,7 @@ program test_fv3gfs_ncio
   print *,'ncid=',dset%ncid
   print *,'nvars=',dset%nvars
   print *,'ndims=',dset%ndims
-  print *,'ngatts=',dset%ngatts
+  print *,'natts=',dset%natts
   do ndim=1,dset%ndims
   print *,'dim',ndim,trim(dset%dimensions(ndim)%name),dset%dimensions(ndim)%len,dset%dimensions(ndim)%isunlimited
   enddo
