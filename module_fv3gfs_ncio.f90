@@ -168,6 +168,10 @@ module module_fv3gfs_ncio
     real(8), allocatable, dimension(:,:) :: values_2d
     real(8), allocatable, dimension(:,:,:) :: values_3d
     real(8), allocatable, dimension(:,:,:,:) :: values_4d
+    integer, allocatable, dimension(:) :: ivalues_1d
+    integer, allocatable, dimension(:,:) :: ivalues_2d
+    integer, allocatable, dimension(:,:,:) :: ivalues_3d
+    integer, allocatable, dimension(:,:,:,:) :: ivalues_4d
     if (present(copy_vardata)) then
        copyd = copy_vardata
     else
@@ -262,21 +266,42 @@ module module_fv3gfs_ncio
     call nccheck(ncerr)
     if (copyd) then
        ! if desired, copy variable data
-       ! assumes data is real (32 or 64 bit), and 1-4d.
+       ! assumes data is real (32 or 64 bit), or integer (16 or 32 bit) and 1-4d.
        do nvar=1,dsetin%nvars
           varname = trim(dsetin%variables(nvar)%name)
-          if (dsetin%variables(nvar)%ndims == 1) then
-             call read_vardata(dsetin, varname, values_1d)
-             call write_vardata(dset, varname, values_1d)
-          else if (dsetin%variables(nvar)%ndims == 2) then
-             call read_vardata(dsetin, varname, values_2d)
-             call write_vardata(dset, varname, values_2d)
-          else if (dsetin%variables(nvar)%ndims == 3) then
-             call read_vardata(dsetin, varname, values_3d)
-             call write_vardata(dset, varname, values_3d)
-          else if (dsetin%variables(nvar)%ndims == 4) then
-             call read_vardata(dsetin, varname, values_4d)
-             call write_vardata(dset, varname, values_4d)
+          if (dsetin%variables(nvar)%dtype == NF90_FLOAT .or.&
+              dsetin%variables(nvar)%dtype == NF90_DOUBLE) then
+             if (dsetin%variables(nvar)%ndims == 1) then
+                call read_vardata(dsetin, varname, values_1d)
+                call write_vardata(dset, varname, values_1d)
+             else if (dsetin%variables(nvar)%ndims == 2) then
+                call read_vardata(dsetin, varname, values_2d)
+                call write_vardata(dset, varname, values_2d)
+             else if (dsetin%variables(nvar)%ndims == 3) then
+                call read_vardata(dsetin, varname, values_3d)
+                call write_vardata(dset, varname, values_3d)
+             else if (dsetin%variables(nvar)%ndims == 4) then
+                call read_vardata(dsetin, varname, values_4d)
+                call write_vardata(dset, varname, values_4d)
+             endif
+          elseif (dsetin%variables(nvar)%dtype == NF90_INT .or.&
+                  dsetin%variables(nvar)%dtype == NF90_SHORT) then
+             if (dsetin%variables(nvar)%ndims == 1) then
+                call read_vardata(dsetin, varname, ivalues_1d)
+                call write_vardata(dset, varname, ivalues_1d)
+             else if (dsetin%variables(nvar)%ndims == 2) then
+                call read_vardata(dsetin, varname, ivalues_2d)
+                call write_vardata(dset, varname, ivalues_2d)
+             else if (dsetin%variables(nvar)%ndims == 3) then
+                call read_vardata(dsetin, varname, ivalues_3d)
+                call write_vardata(dset, varname, ivalues_3d)
+             else if (dsetin%variables(nvar)%ndims == 4) then
+                call read_vardata(dsetin, varname, ivalues_4d)
+                call write_vardata(dset, varname, ivalues_4d)
+             endif
+          else
+             print *,'not copying variable ',trim(adjustl(varname)),&
+                     ' (unsupported data type)'
           endif
        enddo
     endif
