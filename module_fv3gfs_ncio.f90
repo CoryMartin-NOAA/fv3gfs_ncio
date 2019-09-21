@@ -148,16 +148,24 @@ module module_fv3gfs_ncio
     ! variables and dimensions.  
     implicit none
     character(len=*), intent(in) :: filename
-    character(len=nf90_max_name) :: dimname
+    character(len=nf90_max_name) :: dimname, attname
     type(Dataset), intent(out) :: dset
     type(Dataset), intent(in) :: dsetin
     integer ncerr,ncid,nunlimdim
-    integer ndim,nvar,n,ishuffle
+    integer ndim,nvar,n,ishuffle,natt
     ! create netcdf file
     ncerr = nf90_create(trim(filename), &
             cmode=IOR(IOR(NF90_CLOBBER,NF90_NETCDF4),NF90_CLASSIC_MODEL), &
             ncid=dset%ncid)
     call nccheck(ncerr)
+    ! copy global attributes
+    do natt=1,dsetin%ngatts
+       ncerr = nf90_inq_attname(dsetin%ncid, NF90_GLOBAL, natt, attname)
+       call nccheck(ncerr)
+       ncerr = nf90_copy_att(dsetin%ncid, NF90_GLOBAL, attname, dset%ncid, NF90_GLOBAL)
+       call nccheck(ncerr)
+    enddo
+    dset%ngatts = dsetin%ngatts
     dset%filename = trim(filename)
     dset%ndims = dsetin%ndims
     allocate(dset%variables(dsetin%nvars))
