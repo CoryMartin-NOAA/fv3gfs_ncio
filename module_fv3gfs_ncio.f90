@@ -65,7 +65,7 @@ module module_fv3gfs_ncio
 
   public :: open_dataset, create_dataset, close_dataset, Dataset, Variable, Dimension, &
   read_vardata, read_attribute, write_vardata, write_attribute, get_ndim, &
-  get_nvar, get_var, get_dim
+  get_nvar, get_var, get_dim, quantized
 
   contains
 

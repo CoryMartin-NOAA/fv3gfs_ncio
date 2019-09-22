@@ -45,6 +45,25 @@ call read_vardata(dso, 'time', times)
 times = times + 6 ! add six hours.
 call write_vardata(dso, 'time', times)
 ```
+* quantize variable data before writing for better compression
+```fortran
+! Lossy compression if nbits>0 and no missing values present
+! The floating point data is quantized to improve compression
+! Dee doi:10.5194/gmd-10-413-2017.  The method employed
+! here is identical to the 'scaled linear packing' method in
+! that paper, except that the data are scaling into an arbitrary
+! range (2**nbits-1 not just 2**16-1) and are stored as re-scaled floats
+! instead of short integers. The zlib algorithm does almost as
+! well packing the rescaled floats as it does the scaled
+! integers, and this avoids the need for the client to apply the
+! rescaling (plus it allows the ability to adjust the packing range).
+data_save = data
+dataMax = maxval(data); dataMin = minval(data)
+! fvgfs multi-level data quantized with nbits = 14
+data = quantized(data_save, nbits, dataMin, dataMax)
+! compute max abs compression error to save as a variable attribute.
+compress_err = maxval(abs(data_save-data))
+```
 * write an attribute.
 ```fortran
 charatt = 'hours since 2016-01-04 06:00:00'
