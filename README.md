@@ -50,3 +50,7 @@ call write_vardata(dset, 'time', times)
 charatt = 'hours since 2016-01-04 06:00:00'
 call write_attribute(dso, 'units', charatt, 'time')
 ```
+* close a dataset.
+```fortran
+call close_dataset(ds)
+call close_dataset(dso)
