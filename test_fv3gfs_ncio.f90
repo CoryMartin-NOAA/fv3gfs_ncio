@@ -14,7 +14,7 @@ program test_fv3gfs_ncio
   real(4) mval
   integer ndim,nvar,ndims,ival
   filename='test_data/dynf000.nc'
-  call open_dataset(filename, dset)
+  dset = open_dataset(filename)
   print *,'ncid=',dset%ncid
   print *,'nvars=',dset%nvars
   print *,'ndims=',dset%ndims
@@ -47,7 +47,7 @@ program test_fv3gfs_ncio
   print *,'ak =',values_1d
 ! create a copy of the dataset
   filename='test_data/dynf000_copy.nc'
-  call create_dataset(dset, filename, dsetout, copy_vardata=.true.)
+  dsetout = create_dataset(filename, dset, copy_vardata=.true.)
   call write_attribute(dsetout,'foo',1,'ugrd')
   if (allocated(values_1d)) deallocate(values_1d)
   allocate(values_1d(5))

@@ -162,12 +162,12 @@ module module_fv3gfs_ncio
     enddo
   end subroutine set_varunlimdimlens_
  
-  subroutine open_dataset(filename, dset)
+  function open_dataset(filename) result(dset)
     ! open existing dataset, create dataset object for netcdf file 
     implicit none
     character(len=*), intent(in) :: filename
     character(len=nf90_max_name) :: dimname
-    type(Dataset), intent(out) :: dset
+    type(Dataset) :: dset
     integer ncerr,ncid,nunlimdim
     integer ndim,nvar,n
     ! open netcdf file, get info, populate Dataset object.
@@ -221,16 +221,16 @@ module module_fv3gfs_ncio
           endif
        enddo
     enddo
-  end subroutine open_dataset
+  end function open_dataset
 
-  subroutine create_dataset(dsetin, filename, dset, copy_vardata)
+  function create_dataset(filename, dsetin, copy_vardata) result(dset)
     ! create new dataset, using an existing dataset object to define
-    ! variables and dimensions.  
+    ! variables, dimensions and attributes.
     implicit none
     character(len=*), intent(in) :: filename
     character(len=nf90_max_name) :: dimname, attname, varname
     logical, intent(in), optional :: copy_vardata
-    type(Dataset), intent(out) :: dset
+    type(Dataset) :: dset
     type(Dataset), intent(in) :: dsetin
     integer ncerr,ncid,nunlimdim
     integer ndim,nvar,n,ishuffle,natt
@@ -383,7 +383,7 @@ module module_fv3gfs_ncio
           endif
        enddo
     endif
-  end subroutine create_dataset
+  end function create_dataset
  
   subroutine close_dataset(dset)
     ! deallocate members of dataset object
