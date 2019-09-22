@@ -64,7 +64,7 @@ module module_fv3gfs_ncio
   end interface
 
   public :: open_dataset, create_dataset, close_dataset, Dataset, Variable, Dimension, get_nvar
-  public :: read_vardata, read_attribute, write_vardata, write_attribute, get_vardim, get_dimlen
+  public :: read_vardata, read_attribute, write_vardata, write_attribute, get_vardim, get_ndim
 
   contains
 
@@ -91,18 +91,44 @@ module module_fv3gfs_ncio
     get_vardim = dset%variables(nvar)%ndims
   end function get_vardim
 
-  integer function get_dimlen(dset, dimname)
-    ! return length of dimension
+  integer function get_ndim(dset, dimname)
+    ! get dimension index given name
     type(Dataset), intent(in) :: dset
     character(len=*), intent(in) :: dimname
+    logical foundit
     integer ndim
+    foundit = .false.
     do ndim=1,dset%ndims
        if (trim(dset%dimensions(ndim)%name) == trim(dimname)) then 
           exit
        endif
     enddo
-    get_dimlen = dset%dimensions(ndim)%len
-  end function get_dimlen
+    if (.not. foundit) then
+       print *,'no dimension named ',dimname
+       stop "stopped"
+    endif
+    get_ndim = ndim
+  end function get_ndim
+
+  integer function get_nvar(dset,varname)
+    ! get variable index given name
+    type(Dataset), intent(in) :: dset
+    character(len=*), intent(in) :: varname
+    logical foundit
+    integer nvar
+    foundit = .false.
+    do nvar=1,dset%nvars
+       if (trim(dset%variables(nvar)%name) == trim(varname)) then 
+          foundit = .true.
+          exit
+       endif
+    enddo
+    if (.not. foundit) then
+       print *,'no variable named ',varname
+       stop "stopped"
+    endif
+    get_nvar = nvar
+  end function get_nvar
 
   subroutine set_varunlimdimlens_(dset)
     ! reset dimension length (dimlens) for unlim dim for all variables
@@ -367,26 +393,6 @@ module module_fv3gfs_ncio
     enddo
     deallocate(dset%variables,dset%dimensions)
   end subroutine close_dataset
-
-  integer function get_nvar(dset,varname)
-    ! get variable index given name
-    type(Dataset), intent(in) :: dset
-    character(len=*), intent(in) :: varname
-    logical foundit
-    integer nvar
-    foundit = .false.
-    do nvar=1,dset%nvars
-       if (trim(dset%variables(nvar)%name) == trim(varname)) then 
-          foundit = .true.
-          exit
-       endif
-    enddo
-    if (.not. foundit) then
-       print *,'no variable named ',varname
-       stop "stopped"
-    endif
-    get_nvar = nvar
-  end function get_nvar
 
   subroutine read_vardata_1d_r4(dset, varname, values)
     real(4), allocatable, dimension(:), intent(inout) :: values
