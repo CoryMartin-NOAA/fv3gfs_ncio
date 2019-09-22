@@ -55,7 +55,7 @@ call write_attribute(dso, 'units', charatt, 'time')
 type(Variable) :: var
 type(Dimension) :: dim
 ! see module_fv3gfs_ncio.f90 for type definitions.
-! type members can be used to call netcdf-fortran90 interface
+! type members can be used to the call netcdf-fortran90 interface
 ! directly.
 var = get_var(ds, 'ugrd')
 dim = get_dim(ds, 'time')
