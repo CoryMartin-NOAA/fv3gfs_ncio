@@ -369,7 +369,7 @@ module module_fv3gfs_ncio
   end subroutine close_dataset
 
   integer function get_nvar(dset,varname)
-    ! private function to get variable index given name
+    ! get variable index given name
     type(Dataset), intent(in) :: dset
     character(len=*), intent(in) :: varname
     logical foundit
