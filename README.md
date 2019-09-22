@@ -25,25 +25,25 @@ real(4), allocatable, dimension(:,:,:) :: psfc
 ! arrays must be of correct rank (but not necessarily
 ! the same type). They are allocated and filled.
 ! The entire variable is read at once.
-call read_vardata(dset,'latitudes',lats)
-call read_vardata(dset,'latitudes',lons)
-call read_vardata(dset,'pressfc',psfc)
+call read_vardata(ds,'latitudes',lats)
+call read_vardata(ds,'latitudes',lons)
+call read_vardata(ds,'pressfc',psfc)
 ```
 * create a new dataset from a template dataset.
 ```fortran
 type(Dataset) :: dso
 ! copy_vardata is optional, default .false. means just
 ! copy variables, dimensions and attributes and don't copy variable data.
-dso = create_dataset('gfs.t00z.atmf240_copy.nc', dset, copy_vardata=.true.)
+dso = create_dataset('gfs.t00z.atmf240_copy.nc', ds, copy_vardata=.true.)
 ```
 * write a variable.
 ```fortran
 real(8), allocatable, dimension(:) :: times
-call read_vardata(dset, 'time', times)
+call read_vardata(dso, 'time', times)
 ! times is now allocated and filled with values from template dataset.
 ! now overwrite with new values and write back.
 times = times + 6 ! add six hours.
-call write_vardata(dset, 'time', times)
+call write_vardata(dso, 'time', times)
 ```
 * write an attribute.
 ```fortran
