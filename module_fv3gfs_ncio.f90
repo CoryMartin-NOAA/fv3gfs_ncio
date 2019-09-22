@@ -59,7 +59,7 @@ module module_fv3gfs_ncio
   interface write_attribute
       module procedure write_attribute_r4_scalar, write_attribute_int_scalar,&
       write_attribute_r8_scalar, write_attribute_r4_1d,&
-      write_attribute_int_1d, write_attribute_r8_1d
+      write_attribute_int_1d, write_attribute_r8_1d, write_attribute_char
   end interface
 
   public :: open_dataset, create_dataset, close_dataset, Dataset, Variable, Dimension
@@ -527,5 +527,10 @@ module module_fv3gfs_ncio
     integer, intent(in), allocatable, dimension(:) :: values
     include "write_attribute_code.f90"
   end subroutine write_attribute_int_1d
+
+  subroutine write_attribute_char(dset, attname, values, varname)
+    character(len=*), intent(in) :: values
+    include "write_attribute_code.f90"
+  end subroutine write_attribute_char
 
 end module module_fv3gfs_ncio

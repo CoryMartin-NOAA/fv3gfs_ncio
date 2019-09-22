@@ -47,6 +47,7 @@ program test_fv3gfs_ncio
   allocate(values_1d(5))
   values_1d = (/1,2,3,4,5/)
   call write_attribute(dsetout,'bar',values_1d,'ugrd')
+  call write_attribute(dsetout,'hello','world')
   call close_dataset(dset)
   call close_dataset(dsetout)
 end program test_fv3gfs_ncio
