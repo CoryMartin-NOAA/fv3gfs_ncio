@@ -32,8 +32,8 @@ call read_vardata(ds,'pressfc',psfc)
 * create a new dataset from a template dataset.
 ```fortran
 type(Dataset) :: dso
-! copy_vardata is optional, default .false. means just
-! copy variables, dimensions and attributes and don't copy variable data.
+! copy_vardata is optional, default .false. means just copy
+! variables, dimensions and attributes and don't copy variable data.
 dso = create_dataset('gfs.t00z.atmf240_copy.nc', ds, copy_vardata=.true.)
 ```
 * write a variable.
