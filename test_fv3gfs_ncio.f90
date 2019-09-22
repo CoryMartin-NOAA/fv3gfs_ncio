@@ -42,6 +42,11 @@ program test_fv3gfs_ncio
 ! create a copy of the dataset
   filename='test_data/dynf000_copy.nc'
   call create_dataset(dset, filename, dsetout, copy_vardata=.true.)
+  call write_attribute(dsetout,'foo',1,'ugrd')
+  if (allocated(values_1d)) deallocate(values_1d)
+  allocate(values_1d(5))
+  values_1d = (/1,2,3,4,5/)
+  call write_attribute(dsetout,'bar',values_1d,'ugrd')
   call close_dataset(dset)
   call close_dataset(dsetout)
 end program test_fv3gfs_ncio

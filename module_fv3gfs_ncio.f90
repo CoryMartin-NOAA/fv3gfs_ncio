@@ -56,8 +56,14 @@ module module_fv3gfs_ncio
       read_attribute_int_1d, read_attribute_r8_1d
   end interface
 
+  interface write_attribute
+      module procedure write_attribute_r4_scalar, write_attribute_int_scalar,&
+      write_attribute_r8_scalar, write_attribute_r4_1d,&
+      write_attribute_int_1d, write_attribute_r8_1d
+  end interface
+
   public :: open_dataset, create_dataset, close_dataset, Dataset, Variable, Dimension
-  public :: read_vardata, read_attribute, get_vardim, get_dimlen
+  public :: read_vardata, read_attribute, write_vardata, write_attribute, get_vardim, get_dimlen
 
   contains
 
@@ -180,6 +186,7 @@ module module_fv3gfs_ncio
     ! create netcdf file
     ncerr = nf90_create(trim(filename), &
             cmode=IOR(IOR(NF90_CLOBBER,NF90_NETCDF4),NF90_CLASSIC_MODEL), &
+            !cmode=IOR(NF90_CLOBBER,NF90_NETCDF4), &
             ncid=dset%ncid)
     call nccheck(ncerr)
     ! copy global attributes
@@ -490,5 +497,35 @@ module module_fv3gfs_ncio
     integer, intent(inout), allocatable, dimension(:) :: values
     include "read_attribute_code.f90"
   end subroutine read_attribute_int_1d
+
+  subroutine write_attribute_int_scalar(dset, attname, values, varname)
+    integer, intent(in) :: values
+    include "write_attribute_code.f90"
+  end subroutine write_attribute_int_scalar
+
+  subroutine write_attribute_r4_scalar(dset, attname, values, varname)
+    real(4), intent(in) :: values
+    include "write_attribute_code.f90"
+  end subroutine write_attribute_r4_scalar
+
+  subroutine write_attribute_r8_scalar(dset, attname, values, varname)
+    real(8), intent(in) :: values
+    include "write_attribute_code.f90"
+  end subroutine write_attribute_r8_scalar
+
+  subroutine write_attribute_r4_1d(dset, attname, values, varname)
+    real(4), intent(in), allocatable, dimension(:) :: values
+    include "write_attribute_code.f90"
+  end subroutine write_attribute_r4_1d
+
+  subroutine write_attribute_r8_1d(dset, attname, values, varname)
+    real(8), intent(in), allocatable, dimension(:) :: values
+    include "write_attribute_code.f90"
+  end subroutine write_attribute_r8_1d
+
+  subroutine write_attribute_int_1d(dset, attname, values, varname)
+    integer, intent(in), allocatable, dimension(:) :: values
+    include "write_attribute_code.f90"
+  end subroutine write_attribute_int_1d
 
 end module module_fv3gfs_ncio
