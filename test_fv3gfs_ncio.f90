@@ -3,6 +3,7 @@ program test_fv3gfs_ncio
 ! -lnetcdf -lnetcdff
   use module_fv3gfs_ncio
   character(len=500) filename
+  character(len=72) charatt
   type(Dataset) :: dset, dsetout
   real(4), allocatable, dimension(:) :: values_1d
   real(8), allocatable, dimension(:) :: values8_1d
@@ -48,6 +49,8 @@ program test_fv3gfs_ncio
   values_1d = (/1,2,3,4,5/)
   call write_attribute(dsetout,'bar',values_1d,'ugrd')
   call write_attribute(dsetout,'hello','world')
+  call read_attribute(dsetout,'hello',charatt)
+  print *,trim(charatt)
   call close_dataset(dset)
   call close_dataset(dsetout)
 end program test_fv3gfs_ncio

@@ -53,7 +53,7 @@ module module_fv3gfs_ncio
   interface read_attribute
       module procedure read_attribute_r4_scalar, read_attribute_int_scalar,&
       read_attribute_r8_scalar, read_attribute_r4_1d,&
-      read_attribute_int_1d, read_attribute_r8_1d
+      read_attribute_int_1d, read_attribute_r8_1d, read_attribute_char
   end interface
 
   interface write_attribute
@@ -497,6 +497,11 @@ module module_fv3gfs_ncio
     integer, intent(inout), allocatable, dimension(:) :: values
     include "read_attribute_code.f90"
   end subroutine read_attribute_int_1d
+
+  subroutine read_attribute_char(dset, attname, values, varname)
+    character(len=*), intent(inout) :: values
+    include "read_scalar_attribute_code.f90"
+  end subroutine read_attribute_char
 
   subroutine write_attribute_int_scalar(dset, attname, values, varname)
     integer, intent(in) :: values
