@@ -47,9 +47,9 @@ call write_vardata(dso, 'time', times)
 ```
 * quantize variable data before writing for better compression
 ```fortran
-! Lossy compression if nbits>0 and no missing values present
+! Lossy compression controlled by parameter nbits (1-31).
 ! The floating point data is quantized to improve compression
-! Dee doi:10.5194/gmd-10-413-2017.  The method employed
+! See doi:10.5194/gmd-10-413-2017.  The method employed
 ! here is identical to the 'scaled linear packing' method in
 ! that paper, except that the data are scaling into an arbitrary
 ! range (2**nbits-1 not just 2**16-1) and are stored as re-scaled floats
