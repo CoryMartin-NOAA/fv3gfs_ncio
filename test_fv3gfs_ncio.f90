@@ -24,8 +24,8 @@ program test_fv3gfs_ncio
   do nvar=1,dset%nvars
   print *,'var',nvar,trim(dset%variables(nvar)%name),dset%variables(nvar)%ndims,dset%variables(nvar)%dimlens
   enddo
-  ndims = get_vardim(dset,'vgrd') 
-  print *,'vgrd has ',ndims,' dims'
+  nvar = get_nvar(dset,'vgrd') 
+  print *,'vgrd has ',dset%variables(nvar)%ndims,' dims'
   call read_vardata(dset, 'vgrd', values_4d)
   print *,'min/max vgrd (4d)'
   print *,minval(values_4d),maxval(values_4d)

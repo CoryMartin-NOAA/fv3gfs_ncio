@@ -64,7 +64,7 @@ module module_fv3gfs_ncio
   end interface
 
   public :: open_dataset, create_dataset, close_dataset, Dataset, Variable, Dimension, get_nvar
-  public :: read_vardata, read_attribute, write_vardata, write_attribute, get_vardim, get_ndim
+  public :: read_vardata, read_attribute, write_vardata, write_attribute, get_ndim
 
   contains
 
@@ -77,19 +77,6 @@ module module_fv3gfs_ncio
       stop "stopped"
     end if
   end subroutine nccheck
-
-  integer function get_vardim(dset, varname)
-    ! return number of dimensions associated with variable
-    type(Dataset), intent(in) :: dset
-    character(len=*), intent(in) :: varname
-    integer nvar
-    do nvar=1,dset%nvars
-       if (trim(dset%variables(nvar)%name) == trim(varname)) then 
-          exit
-       endif
-    enddo
-    get_vardim = dset%variables(nvar)%ndims
-  end function get_vardim
 
   integer function get_ndim(dset, dimname)
     ! get dimension index given name
