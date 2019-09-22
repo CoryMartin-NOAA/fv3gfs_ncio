@@ -8,7 +8,7 @@
     character(len=*), intent(in) :: attname
     integer ncerr, varid, nvar, nlen
     if(present(varname))then
-        nvar = nvar_(dset,varname)
+        nvar = get_nvar(dset,varname)
         varid = dset%variables(nvar)%varid
     else
         varid = NF90_GLOBAL

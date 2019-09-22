@@ -13,9 +13,10 @@ module module_fv3gfs_ncio
      integer dtype
      integer natts
      integer deflate_level
-     logical shuffle
+     logical shuffle, hasunlim
      character(len=nf90_max_name) :: name
-     integer, allocatable, dimension(:) :: dimids 
+     integer, allocatable, dimension(:) :: dimids
+     integer, allocatable, dimension(:) :: dimindxs
      character(len=nf90_max_name), allocatable, dimension(:) :: dimnames 
      integer, allocatable, dimension(:) :: dimlens
   end type Variable   
@@ -62,7 +63,7 @@ module module_fv3gfs_ncio
       write_attribute_int_1d, write_attribute_r8_1d, write_attribute_char
   end interface
 
-  public :: open_dataset, create_dataset, close_dataset, Dataset, Variable, Dimension
+  public :: open_dataset, create_dataset, close_dataset, Dataset, Variable, Dimension, get_nvar
   public :: read_vardata, read_attribute, write_vardata, write_attribute, get_vardim, get_dimlen
 
   contains
@@ -102,7 +103,33 @@ module module_fv3gfs_ncio
     enddo
     get_dimlen = dset%dimensions(ndim)%len
   end function get_dimlen
-    
+
+  subroutine set_varunlimdimlens_(dset)
+    ! reset dimension length (dimlens) for unlim dim for all variables
+    type(Dataset), intent(inout) :: dset
+    integer ndim,n,nvar,ncerr
+    ! loop over all vars
+    do nvar=1,dset%nvars
+       ! does var have unlim dimension?
+       if (dset%variables(nvar)%hasunlim) then
+          ! loop over all var dimensions
+          do ndim=1,dset%variables(nvar)%ndims
+             n = dset%variables(nvar)%dimindxs(ndim)
+             ! n is the dimension index for this variable dimension
+             ! if this dim is unlimited, update dimlens entry
+             if (dset%dimensions(n)%isunlimited) then
+                ncerr = nf90_inquire_dimension(dset%ncid,&
+                                               dset%dimensions(n)%dimid, &
+                                               len=dset%variables(nvar)%dimlens(ndim))
+                ! also update len attribute of Dimension object
+                dset%dimensions(n)%len = dset%variables(nvar)%dimlens(ndim)
+                call nccheck(ncerr)
+             endif
+          enddo
+       endif
+    enddo
+  end subroutine set_varunlimdimlens_
+ 
   subroutine open_dataset(filename, dset)
     ! open existing dataset, create dataset object for netcdf file 
     implicit none
@@ -131,6 +158,7 @@ module module_fv3gfs_ncio
        endif
     enddo
     do nvar=1,dset%nvars
+       dset%variables(nvar)%hasunlim = .false.
        dset%variables(nvar)%varid = nvar
        ncerr = nf90_inquire_variable(dset%ncid, nvar,&
                                      name=dset%variables(nvar)%name,&
@@ -139,6 +167,7 @@ module module_fv3gfs_ncio
                                      ndims=dset%variables(nvar)%ndims)
        call nccheck(ncerr)
        allocate(dset%variables(nvar)%dimids(dset%variables(nvar)%ndims))
+       allocate(dset%variables(nvar)%dimindxs(dset%variables(nvar)%ndims))
        allocate(dset%variables(nvar)%dimlens(dset%variables(nvar)%ndims))
        allocate(dset%variables(nvar)%dimnames(dset%variables(nvar)%ndims))
        ncerr = nf90_inquire_variable(dset%ncid, nvar,&
@@ -152,8 +181,12 @@ module module_fv3gfs_ncio
                exit
             endif
           enddo
+          dset%variables(nvar)%dimindxs(ndim) = n
           dset%variables(nvar)%dimlens(ndim) = dset%dimensions(n)%len
           dset%variables(nvar)%dimnames(ndim) = dset%dimensions(n)%name
+          if (dset%dimensions(n)%isunlimited) then
+             dset%variables(nvar)%hasunlim = .true.
+          endif
        enddo
     enddo
   end subroutine open_dataset
@@ -225,8 +258,10 @@ module module_fv3gfs_ncio
     enddo
     ! create variables
     do nvar=1,dsetin%nvars
+       dset%variables(nvar)%hasunlim = .false.
        dset%variables(nvar)%ndims = dsetin%variables(nvar)%ndims
        allocate(dset%variables(nvar)%dimids(dset%variables(nvar)%ndims))
+       allocate(dset%variables(nvar)%dimindxs(dset%variables(nvar)%ndims))
        allocate(dset%variables(nvar)%dimnames(dset%variables(nvar)%ndims))
        allocate(dset%variables(nvar)%dimlens(dset%variables(nvar)%ndims))
        do ndim=1,dset%variables(nvar)%ndims
@@ -236,9 +271,13 @@ module module_fv3gfs_ncio
                exit
             endif
           enddo
+          dset%variables(nvar)%dimindxs(ndim) = n
           dset%variables(nvar)%dimids(ndim) = dset%dimensions(n)%dimid
           dset%variables(nvar)%dimlens(ndim) = dset%dimensions(n)%len
           dset%variables(nvar)%dimnames(ndim) = dset%dimensions(n)%name
+          if (dset%dimensions(n)%isunlimited) then
+             dset%variables(nvar)%hasunlim = .true.
+          endif
        enddo
        dset%variables(nvar)%name = dsetin%variables(nvar)%name
        dset%variables(nvar)%dtype = dsetin%variables(nvar)%dtype
@@ -322,13 +361,14 @@ module module_fv3gfs_ncio
     call nccheck(ncerr)
     do nvar=1,dset%nvars
        deallocate(dset%variables(nvar)%dimids)
+       deallocate(dset%variables(nvar)%dimindxs)
        deallocate(dset%variables(nvar)%dimlens)
        deallocate(dset%variables(nvar)%dimnames)
     enddo
     deallocate(dset%variables,dset%dimensions)
   end subroutine close_dataset
 
-  integer function nvar_(dset,varname)
+  integer function get_nvar(dset,varname)
     ! private function to get variable index given name
     type(Dataset), intent(in) :: dset
     character(len=*), intent(in) :: varname
@@ -345,8 +385,8 @@ module module_fv3gfs_ncio
        print *,'no variable named ',varname
        stop "stopped"
     endif
-    nvar_ = nvar
-  end function nvar_
+    get_nvar = nvar
+  end function get_nvar
 
   subroutine read_vardata_1d_r4(dset, varname, values)
     real(4), allocatable, dimension(:), intent(inout) :: values

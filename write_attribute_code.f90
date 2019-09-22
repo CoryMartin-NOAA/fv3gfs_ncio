@@ -13,9 +13,9 @@
     else
         varid = NF90_GLOBAL
     endif 
-    ncerr = nf90_inquire_attribute(dset%ncid, varid, attname, len=nlen)
+    ncerr = nf90_redef(dset%ncid)
     call nccheck(ncerr)
-    if (allocated(values)) deallocate(values)
-    allocate(values(nlen))
-    ncerr = nf90_get_att(dset%ncid, varid, trim(attname), values)
+    ncerr = nf90_put_att(dset%ncid, varid, trim(attname), values)
+    call nccheck(ncerr)
+    ncerr = nf90_enddef(dset%ncid)
     call nccheck(ncerr)

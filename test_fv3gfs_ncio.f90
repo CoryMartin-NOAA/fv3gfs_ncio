@@ -10,6 +10,7 @@ program test_fv3gfs_ncio
   real(4), allocatable, dimension(:,:) :: values_2d
   real(4), allocatable, dimension(:,:,:) :: values_3d
   real(4), allocatable, dimension(:,:,:,:) :: values_4d
+  real(4) mval
   integer ndim,nvar,ndims,ival
   filename='test_data/dynf000.nc'
   call open_dataset(filename, dset)
@@ -31,6 +32,9 @@ program test_fv3gfs_ncio
   print *,'min/max hgtsfc (3d)'
   call read_vardata(dset, 'hgtsfc', values_3d)
   print *,minval(values_3d),maxval(values_3d)
+  print *,'min/max pressfc (3d)'
+  call read_vardata(dset, 'pressfc', values_3d)
+  print *,minval(values_3d),maxval(values_3d)
   print *,'min/max pfull (1d_r8)'
   call read_vardata(dset, 'pfull', values8_1d)
   print *,minval(values8_1d),maxval(values8_1d)
@@ -51,6 +55,23 @@ program test_fv3gfs_ncio
   call write_attribute(dsetout,'hello','world')
   call read_attribute(dsetout,'hello',charatt)
   print *,trim(charatt)
+  call read_attribute(dsetout,'missing_value',mval,'pressfc')
+  print *,'missing_value=',mval
+  call read_vardata(dsetout, 'pressfc', values_3d)
+  print *,'min/max pressfc',minval(values_3d),maxval(values_3d)
+  print *,shape(values_3d)
+  values_3d(:,:,:) = mval
+  call write_vardata(dsetout,'pressfc', values_3d)
+  call read_vardata(dsetout, 'pressfc', values_3d)
+  print *,'min/max pressfc',minval(values_3d),maxval(values_3d)
+  print *,shape(values_3d)
+  nvar = get_nvar(dsetout, 'vgrd')
+  print *,trim(dsetout%variables(nvar)%name)
+  do n=1,dsetout%variables(nvar)%ndims
+     print *,trim(adjustl(dsetout%variables(nvar)%dimnames(n))),&
+             dsetout%variables(nvar)%dimlens(n),&
+             dsetout%dimensions(dsetout%variables(nvar)%dimindxs(n))%len
+  enddo
   call close_dataset(dset)
   call close_dataset(dsetout)
 end program test_fv3gfs_ncio
