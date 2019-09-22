@@ -5,6 +5,7 @@ program test_fv3gfs_ncio
   character(len=500) filename
   character(len=72) charatt
   type(Dataset) :: dset, dsetout
+  type(Variable) :: var
   real(4), allocatable, dimension(:) :: values_1d
   real(8), allocatable, dimension(:) :: values8_1d
   real(4), allocatable, dimension(:,:) :: values_2d
@@ -24,8 +25,8 @@ program test_fv3gfs_ncio
   do nvar=1,dset%nvars
   print *,'var',nvar,trim(dset%variables(nvar)%name),dset%variables(nvar)%ndims,dset%variables(nvar)%dimlens
   enddo
-  nvar = get_nvar(dset,'vgrd') 
-  print *,'vgrd has ',dset%variables(nvar)%ndims,' dims'
+  var = get_var(dset,'vgrd') 
+  print *,'vgrd has ',var%ndims,' dims'
   call read_vardata(dset, 'vgrd', values_4d)
   print *,'min/max vgrd (4d)'
   print *,minval(values_4d),maxval(values_4d)

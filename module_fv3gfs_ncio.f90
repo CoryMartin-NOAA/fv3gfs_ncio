@@ -63,8 +63,9 @@ module module_fv3gfs_ncio
       write_attribute_int_1d, write_attribute_r8_1d, write_attribute_char
   end interface
 
-  public :: open_dataset, create_dataset, close_dataset, Dataset, Variable, Dimension, get_nvar
-  public :: read_vardata, read_attribute, write_vardata, write_attribute, get_ndim
+  public :: open_dataset, create_dataset, close_dataset, Dataset, Variable, Dimension, &
+  read_vardata, read_attribute, write_vardata, write_attribute, get_ndim, &
+  get_nvar, get_var, get_dim
 
   contains
 
@@ -77,6 +78,15 @@ module module_fv3gfs_ncio
       stop "stopped"
     end if
   end subroutine nccheck
+
+  function get_dim(dset, dimname) result(dim)
+    type(Dataset) :: dset
+    type(Dimension) :: dim
+    character(len=*), intent(in) :: dimname
+    integer ndim
+    ndim = get_nvar(dset, dimname)
+    dim = dset%dimensions(ndim)
+  end function get_dim
 
   integer function get_ndim(dset, dimname)
     ! get dimension index given name
@@ -96,6 +106,15 @@ module module_fv3gfs_ncio
     endif
     get_ndim = ndim
   end function get_ndim
+
+  function get_var(dset, varname) result (var)
+    type(Dataset) :: dset
+    type(Variable) :: var
+    character(len=*) :: varname
+    integer nvar
+    nvar = get_nvar(dset, varname)
+    var = dset%variables(nvar)
+  end function get_var
 
   integer function get_nvar(dset,varname)
     ! get variable index given name
