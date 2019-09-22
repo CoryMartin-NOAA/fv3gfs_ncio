@@ -50,6 +50,16 @@ call write_vardata(dset, 'time', times)
 charatt = 'hours since 2016-01-04 06:00:00'
 call write_attribute(dso, 'units', charatt, 'time')
 ```
+* access Variable and Dimension derived data types.
+```fortran
+type(Variable) :: var
+type(Dimension) :: dim
+! see module_fv3gfs_ncio.f90 for type definitions.
+! type members can be used to call netcdf-fortran90 interface
+! directly.
+var = get_var(ds, 'ugrd')
+dim = get_dim(ds, 'time')
+```
 * close a dataset.
 ```fortran
 call close_dataset(ds)
