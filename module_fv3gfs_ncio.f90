@@ -590,4 +590,16 @@ module module_fv3gfs_ncio
     include "write_attribute_code.f90"
   end subroutine write_attribute_char
 
+  elemental real function quantized(dataIn, nbits, dataMin, dataMax)
+    integer, intent(in) :: nbits
+    real(4), intent(in) :: dataIn, dataMin, dataMax
+    real(4) offset, scale_fact
+    ! convert data to 32 bit integers in range 0 to 2**nbits-1, then cast
+    ! cast back to 32 bit floats (data is then quantized in steps
+    ! proportional to 2**nbits so last 32-nbits in floating
+    ! point representation should be zero for efficient zlib compression).
+    scale_fact = (dataMax - dataMin) / (2**nbits-1); offset = dataMin
+    quantized = scale_fact*(nint((dataIn - offset) / scale_fact)) + offset
+  end function quantized
+
 end module module_fv3gfs_ncio
