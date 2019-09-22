@@ -8,32 +8,38 @@ module module_fv3gfs_ncio
   private
 
   type Variable
-     integer varid
-     integer ndims
-     integer dtype
-     integer natts
-     integer deflate_level
-     logical shuffle, hasunlim
-     character(len=nf90_max_name) :: name
-     integer, allocatable, dimension(:) :: dimids
-     integer, allocatable, dimension(:) :: dimindxs
+     integer varid ! netCDF variable ID
+     integer ndims ! number of dimensions
+     integer dtype ! netCDF data type
+     integer natts ! number of attributes
+     integer deflate_level ! compression level (if > 0)
+     logical shuffle  ! shuffle filter?
+     logical hasunlim ! has an unlimited dim?
+     character(len=nf90_max_name) :: name ! variable name
+     integer, allocatable, dimension(:) :: dimids ! netCDF dimension IDs
+     ! indices into Dataset%dimensions for associated dimensions.
+     integer, allocatable, dimension(:) :: dimindxs 
+     ! names of associated dimensions.
      character(len=nf90_max_name), allocatable, dimension(:) :: dimnames 
+     ! current dimension lengths (updated after every write_vardata call)
      integer, allocatable, dimension(:) :: dimlens
   end type Variable   
   type Dimension 
-     integer dimid
-     integer len
-     logical isunlimited
-     character(len=nf90_max_name) :: name
+     integer dimid ! netCDF dimension ID
+     integer len ! dimension length (updated after every write_vardata call)
+     logical isunlimited ! unlimited?
+     character(len=nf90_max_name) :: name ! name of dimension
   end type Dimension
   type Dataset
-     integer :: ncid
-     integer :: nvars
-     integer :: ndims
-     integer :: natts
-     integer :: nunlimdim
-     character(len=500) filename
+     integer :: ncid ! netCDF ID.
+     integer :: nvars ! number of variables in dataset
+     integer :: ndims ! number of dimensions in dataset
+     integer :: natts ! number of dataset (global) attributes
+     integer :: nunlimdim ! dimension ID for unlimited dimension
+     character(len=500) filename ! netCDF filename
+     ! array of Variable instances
      type(Variable), allocatable, dimension(:) :: variables
+     ! array of Dimension instances
      type(Dimension), allocatable, dimension(:) :: dimensions
   end type Dataset
 

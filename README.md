@@ -45,7 +45,7 @@ call read_vardata(dso, 'time', times)
 times = times + 6 ! add six hours.
 call write_vardata(dso, 'time', times)
 ```
-* quantize variable data before writing for better compression
+* quantize variable data before writing for better compression.
 ```fortran
 ! Lossy compression controlled by parameter nbits (1-31).
 ! The floating point data is quantized to improve compression
