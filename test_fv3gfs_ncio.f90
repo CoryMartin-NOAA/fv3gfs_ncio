@@ -3,7 +3,7 @@ program test_fv3gfs_ncio
 ! -lnetcdf -lnetcdff
   use module_fv3gfs_ncio
   character(len=500) filename
-  character(len=72) charatt
+  character(len=72) charatt, time_units
   type(Dataset) :: dset, dsetout
   type(Variable) :: var
   real(4), allocatable, dimension(:) :: values_1d
@@ -12,7 +12,7 @@ program test_fv3gfs_ncio
   real(4), allocatable, dimension(:,:,:) :: values_3d
   real(4), allocatable, dimension(:,:,:,:) :: values_4d
   real(4) mval
-  integer ndim,nvar,ndims,ival
+  integer ndim,nvar,ndims,ival,idate(6)
   filename='test_data/dynf000.nc'
   dset = open_dataset(filename)
   print *,'ncid=',dset%ncid
@@ -30,12 +30,22 @@ program test_fv3gfs_ncio
   call read_vardata(dset, 'vgrd', values_4d)
   print *,'min/max vgrd (4d)'
   print *,minval(values_4d),maxval(values_4d)
+  ! this should work also, since time dim is singleton
+  call read_vardata(dset, 'vgrd', values_3d) 
+  print *,'min/max vgrd (3d)'
+  print *,minval(values_3d),maxval(values_3d)
+  print *,'min/max diff=',minval(values_4d(:,:,:,1)-values_3d),maxval(values_4d(:,:,:,1)-values_3d)
+  ! this should work also, since time dim is singleton
   print *,'min/max hgtsfc (3d)'
   call read_vardata(dset, 'hgtsfc', values_3d)
   print *,minval(values_3d),maxval(values_3d)
   print *,'min/max pressfc (3d)'
   call read_vardata(dset, 'pressfc', values_3d)
   print *,minval(values_3d),maxval(values_3d)
+  print *,'min/max pressfc (2d)'
+  call read_vardata(dset, 'pressfc', values_2d)
+  print *,minval(values_2d),maxval(values_2d)
+  print *,'min/max diff=',minval(values_3d(:,:,1)-values_2d),maxval(values_3d(:,:,1)-values_2d)
   print *,'min/max pfull (1d_r8)'
   call read_vardata(dset, 'pfull', values8_1d)
   print *,minval(values8_1d),maxval(values8_1d)
@@ -73,6 +83,10 @@ program test_fv3gfs_ncio
              dsetout%variables(nvar)%dimlens(n),&
              dsetout%dimensions(dsetout%variables(nvar)%dimindxs(n))%len
   enddo
+  idate = get_idate_from_time_units(dset)
+  print *,'idate=',idate
+  time_units = get_time_units_from_idate(dset, idate)
+  print *,'time_units=',trim(time_units)
   call close_dataset(dset)
   call close_dataset(dsetout)
 end program test_fv3gfs_ncio

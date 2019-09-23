@@ -71,7 +71,8 @@ module module_fv3gfs_ncio
 
   public :: open_dataset, create_dataset, close_dataset, Dataset, Variable, Dimension, &
   read_vardata, read_attribute, write_vardata, write_attribute, get_ndim, &
-  get_nvar, get_var, get_dim, quantized
+  get_nvar, get_var, get_dim, quantized, get_idate_from_time_units,&
+  get_time_units_from_idate
 
   contains
 
@@ -419,62 +420,62 @@ module module_fv3gfs_ncio
     deallocate(dset%variables,dset%dimensions)
   end subroutine close_dataset
 
-  subroutine read_vardata_1d_r4(dset, varname, values)
+  subroutine read_vardata_1d_r4(dset, varname, values, nslice)
     real(4), allocatable, dimension(:), intent(inout) :: values
     include "read_vardata_code_1d.f90"
   end subroutine read_vardata_1d_r4
 
-  subroutine read_vardata_2d_r4(dset, varname, values)
+  subroutine read_vardata_2d_r4(dset, varname, values, nslice)
     real(4), allocatable, dimension(:,:), intent(inout) :: values
     include "read_vardata_code_2d.f90"
   end subroutine read_vardata_2d_r4
 
-  subroutine read_vardata_3d_r4(dset, varname, values)
+  subroutine read_vardata_3d_r4(dset, varname, values, nslice)
     real(4), allocatable, dimension(:,:,:), intent(inout) :: values
     include "read_vardata_code_3d.f90"
   end subroutine read_vardata_3d_r4
 
-  subroutine read_vardata_4d_r4(dset, varname, values)
+  subroutine read_vardata_4d_r4(dset, varname, values, nslice)
     real(4), allocatable, dimension(:,:,:,:), intent(inout) :: values
     include "read_vardata_code_4d.f90"
   end subroutine read_vardata_4d_r4
 
-  subroutine read_vardata_1d_r8(dset, varname, values)
+  subroutine read_vardata_1d_r8(dset, varname, values, nslice)
     real(8), allocatable, dimension(:), intent(inout) :: values
     include "read_vardata_code_1d.f90"
   end subroutine read_vardata_1d_r8
 
-  subroutine read_vardata_2d_r8(dset, varname, values)
+  subroutine read_vardata_2d_r8(dset, varname, values, nslice)
     real(8), allocatable, dimension(:,:), intent(inout) :: values
     include "read_vardata_code_2d.f90"
   end subroutine read_vardata_2d_r8
 
-  subroutine read_vardata_3d_r8(dset, varname, values)
+  subroutine read_vardata_3d_r8(dset, varname, values, nslice)
     real(8), allocatable, dimension(:,:,:), intent(inout) :: values
     include "read_vardata_code_3d.f90"
   end subroutine read_vardata_3d_r8
 
-  subroutine read_vardata_4d_r8(dset, varname, values)
+  subroutine read_vardata_4d_r8(dset, varname, values, nslice)
     real(8), allocatable, dimension(:,:,:,:), intent(inout) :: values
     include "read_vardata_code_4d.f90"
   end subroutine read_vardata_4d_r8
 
-  subroutine read_vardata_1d_int(dset, varname, values)
+  subroutine read_vardata_1d_int(dset, varname, values, nslice)
     integer, allocatable, dimension(:), intent(inout) :: values
     include "read_vardata_code_1d.f90"
   end subroutine read_vardata_1d_int
 
-  subroutine read_vardata_2d_int(dset, varname, values)
+  subroutine read_vardata_2d_int(dset, varname, values, nslice)
     integer, allocatable, dimension(:,:), intent(inout) :: values
     include "read_vardata_code_2d.f90"
   end subroutine read_vardata_2d_int
 
-  subroutine read_vardata_3d_int(dset, varname, values)
+  subroutine read_vardata_3d_int(dset, varname, values, nslice)
     integer, allocatable, dimension(:,:,:), intent(inout) :: values
     include "read_vardata_code_3d.f90"
   end subroutine read_vardata_3d_int
 
-  subroutine read_vardata_4d_int(dset, varname, values)
+  subroutine read_vardata_4d_int(dset, varname, values, nslice)
     integer, allocatable, dimension(:,:,:,:), intent(inout) :: values
     include "read_vardata_code_4d.f90"
   end subroutine read_vardata_4d_int
@@ -621,5 +622,42 @@ module module_fv3gfs_ncio
     scale_fact = (dataMax - dataMin) / (2**nbits-1); offset = dataMin
     quantized = scale_fact*(nint((dataIn - offset) / scale_fact)) + offset
   end function quantized
+
+  function get_idate_from_time_units(dset) result(idate)
+      ! return integer array with year,month,day,hour,minute,second
+      ! parsed from time units attribute.
+      type(Dataset), intent(in) :: dset
+      integer idate(6)
+      character(len=nf90_max_name) :: time_units
+      integer ipos1,ipos2
+      call read_attribute(dset, 'units', time_units, 'time')
+      ipos1 = scan(time_units,"since",back=.true.)+1
+      ipos2 = scan(time_units,"-",back=.false.)-1
+      read(time_units(ipos1:ipos2),*) idate(1)
+      ipos1 = ipos2+2; ipos2=ipos1+1
+      read(time_units(ipos1:ipos2),*) idate(2)
+      ipos1 = ipos2+2; ipos2=ipos1+1
+      read(time_units(ipos1:ipos2),*) idate(3)
+      ipos1 = scan(time_units,":")-2
+      ipos2 = ipos1+1
+      read(time_units(ipos1:ipos2),*) idate(4)
+      ipos1 = ipos2+2
+      ipos2 = ipos1+1
+      read(time_units(ipos1:ipos2),*) idate(5)
+      ipos1=ipos2+2
+      ipos2=ipos1+1
+      read(time_units(ipos1:ipos2),*) idate(6)
+  end function get_idate_from_time_units
+  
+  function get_time_units_from_idate(dset, idate) result(time_units)
+      ! create time units attribute of form 'hours since YYYY-MM-DD HH:MM:SS'
+      ! from integer array with year,month,day,hour,minute,second
+      type(Dataset), intent(in) :: dset
+      integer, intent(in) ::  idate(6)
+      character(len=nf90_max_name) :: time_units
+      write(time_units,101) idate
+101   format('hours since ',i4.4,'-',i2.2,'-',i2.2,' ',&
+      i2.2,':',i2.2,':',i2.2)
+  end function get_time_units_from_idate
 
 end module module_fv3gfs_ncio
