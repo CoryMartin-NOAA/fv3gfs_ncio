@@ -1,5 +1,5 @@
 program test_fv3gfs_ncio
-! ifort -traceback test_read_netcdf.f90 module_fv3gfs_ncio.o -L${NETCDF}/lib
+! ifort -traceback test_fv3gfs_ncio.f90 module_fv3gfs_ncio.o -L${NETCDF}/lib
 ! -lnetcdf -lnetcdff
   use module_fv3gfs_ncio
   character(len=500) filename
