@@ -8,7 +8,7 @@ program example_fv3gfs_ncio
   integer ndim,nvar
   ! template file created by running ncdump -cs on full file, then running ncgen
   ! only coordinate variables have data
-  dsetin = open_dataset('dynf000.nc')
+  dsetin = open_dataset('test_data/dynf000_template.nc')
   ! create a copy of the template file
   dset = create_dataset('dynf000x.nc',dsetin)
   print *,'ncid=',dset%ncid
