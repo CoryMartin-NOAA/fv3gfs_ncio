@@ -4,6 +4,7 @@
     ! it we deallocated and reallocated.
     type(Dataset), intent(in) :: dset
     character(len=*), intent(in) :: varname
+    integer, intent(in), optional :: nslice
     integer ncerr, nvar, n1,n2,n3,n4, ndim
     nvar = get_nvar(dset,varname)
     if (dset%variables(nvar)%ndims /= 4) then
