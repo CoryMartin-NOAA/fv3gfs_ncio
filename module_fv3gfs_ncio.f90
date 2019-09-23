@@ -240,7 +240,7 @@ module module_fv3gfs_ncio
     type(Dataset), intent(in) :: dsetin
     integer ncerr,ncid,nunlimdim
     integer ndim,nvar,n,ishuffle,natt
-    logical copyd
+    logical copyd, coordvar
     real(8), allocatable, dimension(:) :: values_1d
     real(8), allocatable, dimension(:,:) :: values_2d
     real(8), allocatable, dimension(:,:,:) :: values_3d
@@ -250,9 +250,9 @@ module module_fv3gfs_ncio
     integer, allocatable, dimension(:,:,:) :: ivalues_3d
     integer, allocatable, dimension(:,:,:,:) :: ivalues_4d
     if (present(copy_vardata)) then
-       copyd = copy_vardata
+       copyd = .true.  ! copy all variable data
     else
-       copyd = .false.
+       copyd = .false. ! only copy coordinate variable data
     endif
     ! create netcdf file
     ncerr = nf90_create(trim(filename), &
@@ -348,47 +348,52 @@ module module_fv3gfs_ncio
     enddo
     ncerr = nf90_enddef(dset%ncid)
     call nccheck(ncerr)
-    if (copyd) then
-       ! if desired, copy variable data
-       ! assumes data is real (32 or 64 bit), or integer (16 or 32 bit) and 1-4d.
-       do nvar=1,dsetin%nvars
-          varname = trim(dsetin%variables(nvar)%name)
-          if (dsetin%variables(nvar)%dtype == NF90_FLOAT .or.&
-              dsetin%variables(nvar)%dtype == NF90_DOUBLE) then
-             if (dsetin%variables(nvar)%ndims == 1) then
-                call read_vardata(dsetin, varname, values_1d)
-                call write_vardata(dset, varname, values_1d)
-             else if (dsetin%variables(nvar)%ndims == 2) then
-                call read_vardata(dsetin, varname, values_2d)
-                call write_vardata(dset, varname, values_2d)
-             else if (dsetin%variables(nvar)%ndims == 3) then
-                call read_vardata(dsetin, varname, values_3d)
-                call write_vardata(dset, varname, values_3d)
-             else if (dsetin%variables(nvar)%ndims == 4) then
-                call read_vardata(dsetin, varname, values_4d)
-                call write_vardata(dset, varname, values_4d)
-             endif
-          elseif (dsetin%variables(nvar)%dtype == NF90_INT .or.&
-                  dsetin%variables(nvar)%dtype == NF90_SHORT) then
-             if (dsetin%variables(nvar)%ndims == 1) then
-                call read_vardata(dsetin, varname, ivalues_1d)
-                call write_vardata(dset, varname, ivalues_1d)
-             else if (dsetin%variables(nvar)%ndims == 2) then
-                call read_vardata(dsetin, varname, ivalues_2d)
-                call write_vardata(dset, varname, ivalues_2d)
-             else if (dsetin%variables(nvar)%ndims == 3) then
-                call read_vardata(dsetin, varname, ivalues_3d)
-                call write_vardata(dset, varname, ivalues_3d)
-             else if (dsetin%variables(nvar)%ndims == 4) then
-                call read_vardata(dsetin, varname, ivalues_4d)
-                call write_vardata(dset, varname, ivalues_4d)
-             endif
-          else
-             print *,'not copying variable ',trim(adjustl(varname)),&
-                     ' (unsupported data type)'
+    ! if desired, copy variable data
+    ! assumes data is real (32 or 64 bit), or integer (16 or 32 bit) and 1-4d.
+    do nvar=1,dsetin%nvars
+       varname = trim(dsetin%variables(nvar)%name)
+       coordvar = .false.
+       do ndim=1,dset%ndims
+          if (trim(varname) == trim(dset%dimensions(ndim)%name)) then
+             coordvar = .true.
           endif
        enddo
-    endif
+       if (.not. coordvar .and. .not. copyd) cycle
+       if (dsetin%variables(nvar)%dtype == NF90_FLOAT .or.&
+           dsetin%variables(nvar)%dtype == NF90_DOUBLE) then
+          if (dsetin%variables(nvar)%ndims == 1) then
+             call read_vardata(dsetin, varname, values_1d)
+             call write_vardata(dset, varname, values_1d)
+          else if (dsetin%variables(nvar)%ndims == 2) then
+             call read_vardata(dsetin, varname, values_2d)
+             call write_vardata(dset, varname, values_2d)
+          else if (dsetin%variables(nvar)%ndims == 3) then
+             call read_vardata(dsetin, varname, values_3d)
+             call write_vardata(dset, varname, values_3d)
+          else if (dsetin%variables(nvar)%ndims == 4) then
+             call read_vardata(dsetin, varname, values_4d)
+             call write_vardata(dset, varname, values_4d)
+          endif
+       elseif (dsetin%variables(nvar)%dtype == NF90_INT .or.&
+               dsetin%variables(nvar)%dtype == NF90_SHORT) then
+          if (dsetin%variables(nvar)%ndims == 1) then
+             call read_vardata(dsetin, varname, ivalues_1d)
+             call write_vardata(dset, varname, ivalues_1d)
+          else if (dsetin%variables(nvar)%ndims == 2) then
+             call read_vardata(dsetin, varname, ivalues_2d)
+             call write_vardata(dset, varname, ivalues_2d)
+          else if (dsetin%variables(nvar)%ndims == 3) then
+             call read_vardata(dsetin, varname, ivalues_3d)
+             call write_vardata(dset, varname, ivalues_3d)
+          else if (dsetin%variables(nvar)%ndims == 4) then
+             call read_vardata(dsetin, varname, ivalues_4d)
+             call write_vardata(dset, varname, ivalues_4d)
+          endif
+       else
+          print *,'not copying variable ',trim(adjustl(varname)),&
+                  ' (unsupported data type)'
+       endif
+    enddo
   end function create_dataset
  
   subroutine close_dataset(dset)
