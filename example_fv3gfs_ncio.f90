@@ -11,7 +11,7 @@ program example_fv3gfs_ncio
   ! only coordinate variables have data
   dsetin = open_dataset('test_data/dynf000_template.nc')
   ! create a copy of the template file
-  dset = create_dataset('dynf000x.nc',dsetin)
+  dset = create_dataset('test_dat/dynf000_copy.nc',dsetin)
   print *,'ncid=',dset%ncid
   print *,'nvars=',dset%nvars
   print *,'ndims=',dset%ndims
