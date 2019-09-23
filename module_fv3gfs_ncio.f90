@@ -649,15 +649,25 @@ module module_fv3gfs_ncio
       read(time_units(ipos1:ipos2),*) idate(6)
   end function get_idate_from_time_units
   
-  function get_time_units_from_idate(dset, idate) result(time_units)
+  function get_time_units_from_idate(dset, idate, time_measure) result(time_units)
       ! create time units attribute of form 'hours since YYYY-MM-DD HH:MM:SS'
       ! from integer array with year,month,day,hour,minute,second
+      ! optional argument 'time_measure' can be used to change 'hours' to
+      ! 'days', 'minutes', 'seconds' etc.
       type(Dataset), intent(in) :: dset
+      character(len=*), intent(in), optional :: time_measure
       integer, intent(in) ::  idate(6)
+      character(len=12) :: timechar
       character(len=nf90_max_name) :: time_units
+      if (present(time_measure)) then
+         timechar = trim(time_measure)
+      else
+         timechar = 'hours'
+      endif
       write(time_units,101) idate
-101   format('hours since ',i4.4,'-',i2.2,'-',i2.2,' ',&
+101   format(' since ',i4.4,'-',i2.2,'-',i2.2,' ',&
       i2.2,':',i2.2,':',i2.2)
+      time_units = trim(adjustl(timechar))//time_units
   end function get_time_units_from_idate
 
 end module module_fv3gfs_ncio
