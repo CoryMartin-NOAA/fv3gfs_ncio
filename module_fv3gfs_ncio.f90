@@ -169,7 +169,7 @@ module module_fv3gfs_ncio
   end subroutine set_varunlimdimlens_
  
   function open_dataset(filename) result(dset)
-    ! open existing dataset, create dataset object for netcdf file 
+    ! open existing dataset, create dataset object for reading netcdf file 
     implicit none
     character(len=*), intent(in) :: filename
     character(len=nf90_max_name) :: dimname
@@ -610,6 +610,7 @@ module module_fv3gfs_ncio
   end subroutine write_attribute_char
 
   elemental real function quantized(dataIn, nbits, dataMin, dataMax)
+    implicit none
     integer, intent(in) :: nbits
     real(4), intent(in) :: dataIn, dataMin, dataMax
     real(4) offset, scale_fact
