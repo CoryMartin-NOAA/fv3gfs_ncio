@@ -232,6 +232,9 @@ module module_fv3gfs_ncio
   function create_dataset(filename, dsetin, copy_vardata) result(dset)
     ! create new dataset, using an existing dataset object to define
     ! variables, dimensions and attributes.
+    ! If copy_vardata=T, all variable data (not just coordinate
+    ! variable data) is copied. Default is F (only coord var data
+    ! copied).
     implicit none
     character(len=*), intent(in) :: filename
     character(len=nf90_max_name) :: dimname, attname, varname
@@ -348,17 +351,21 @@ module module_fv3gfs_ncio
     enddo
     ncerr = nf90_enddef(dset%ncid)
     call nccheck(ncerr)
-    ! if desired, copy variable data
+    ! copy variable data 
     ! assumes data is real (32 or 64 bit), or integer (16 or 32 bit) and 1-4d.
     do nvar=1,dsetin%nvars
        varname = trim(dsetin%variables(nvar)%name)
+       ! is this variable a coordinate variable?
        coordvar = .false.
        do ndim=1,dset%ndims
           if (trim(varname) == trim(dset%dimensions(ndim)%name)) then
              coordvar = .true.
           endif
        enddo
+       ! if copy_data flag not given, and not a coordinate var,
+       ! skip to next var.
        if (.not. coordvar .and. .not. copyd) cycle
+       ! real variable
        if (dsetin%variables(nvar)%dtype == NF90_FLOAT .or.&
            dsetin%variables(nvar)%dtype == NF90_DOUBLE) then
           if (dsetin%variables(nvar)%ndims == 1) then
@@ -374,6 +381,7 @@ module module_fv3gfs_ncio
              call read_vardata(dsetin, varname, values_4d)
              call write_vardata(dset, varname, values_4d)
           endif
+       ! integer var
        elseif (dsetin%variables(nvar)%dtype == NF90_INT .or.&
                dsetin%variables(nvar)%dtype == NF90_SHORT) then
           if (dsetin%variables(nvar)%ndims == 1) then
@@ -391,7 +399,7 @@ module module_fv3gfs_ncio
           endif
        else
           print *,'not copying variable ',trim(adjustl(varname)),&
-                  ' (unsupported data type)'
+                  ' (unsupported data type or rank)'
        endif
     enddo
   end function create_dataset
