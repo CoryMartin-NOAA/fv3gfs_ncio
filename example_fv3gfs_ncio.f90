@@ -5,6 +5,7 @@ program example_fv3gfs_ncio
   character(len=500) filename
   type(Dataset) :: dsetin, dset
   real(8), allocatable, dimension(:) :: values8_1d
+  real(4), allocatable, dimension(:,:,:) :: values_3d
   integer ndim,nvar
   ! template file created by running ncdump -cs on full file, then running ncgen
   ! only coordinate variables have data
@@ -25,6 +26,9 @@ program example_fv3gfs_ncio
   call read_vardata(dset, 'grid_yt', values8_1d)
   print *,'grid_yt='
   print *,values8_1d
+  ! other vars just filled with _FillValue
+  call read_vardata(dset, 'hgtsfc', values_3d)
+  print *,'min/max hgtsfc=',minval(values_3d),maxval(values_3d)
   call close_dataset(dset)
   call close_dataset(dsetin)
   stop
