@@ -644,8 +644,8 @@ module module_fv3gfs_ncio
       ipos1 = ipos2+2
       ipos2 = ipos1+1
       read(time_units(ipos1:ipos2),*) idate(5)
-      ipos1=ipos2+2
-      ipos2=ipos1+1
+      ipos1 = ipos2+2
+      ipos2 = ipos1+1
       read(time_units(ipos1:ipos2),*) idate(6)
   end function get_idate_from_time_units
   
