@@ -6,7 +6,7 @@
     type(Dataset), intent(in) :: dset
     character(len=*), intent(in), optional :: varname
     character(len=*), intent(in) :: attname
-    integer ncerr, varid, nvar, nlen
+    integer ncerr, varid, nvar
     if(present(varname))then
         nvar = get_nvar(dset,varname)
         varid = dset%variables(nvar)%varid

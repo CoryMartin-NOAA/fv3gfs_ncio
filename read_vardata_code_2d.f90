@@ -5,7 +5,7 @@
     type(Dataset), intent(in) :: dset
     character(len=*), intent(in) :: varname
     integer, intent(in), optional :: nslice
-    integer ncerr, nvar, n1,n2,n3, ndim, ncount
+    integer ncerr, nvar, n1,n2,n3, ncount
     if (present(nslice)) then
        ncount = nslice
     else

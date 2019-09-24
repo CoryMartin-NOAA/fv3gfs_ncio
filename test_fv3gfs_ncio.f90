@@ -85,7 +85,7 @@ program test_fv3gfs_ncio
   enddo
   idate = get_idate_from_time_units(dset)
   print *,'idate=',idate
-  time_units = get_time_units_from_idate(dset, idate, time_measure='minutes')
+  time_units = get_time_units_from_idate(idate, time_measure='minutes')
   print *,'time_units=',trim(time_units)
   call close_dataset(dset)
   call close_dataset(dsetout)

@@ -175,9 +175,8 @@ module module_fv3gfs_ncio
     ! open existing dataset, create dataset object for reading netcdf file 
     implicit none
     character(len=*), intent(in) :: filename
-    character(len=nf90_max_name) :: dimname
     type(Dataset) :: dset
-    integer ncerr,ncid,nunlimdim
+    integer ncerr,nunlimdim
     integer ndim,nvar,n
     ! open netcdf file, get info, populate Dataset object.
     ncerr = nf90_open(trim(filename), NF90_NOWRITE, ncid=dset%ncid)
@@ -240,11 +239,11 @@ module module_fv3gfs_ncio
     ! copied).
     implicit none
     character(len=*), intent(in) :: filename
-    character(len=nf90_max_name) :: dimname, attname, varname
+    character(len=nf90_max_name) :: attname, varname
     logical, intent(in), optional :: copy_vardata
     type(Dataset) :: dset
     type(Dataset), intent(in) :: dsetin
-    integer ncerr,ncid,nunlimdim
+    integer ncerr
     integer ndim,nvar,n,ishuffle,natt
     logical copyd, coordvar
     real(8), allocatable, dimension(:) :: values_1d
@@ -437,7 +436,7 @@ module module_fv3gfs_ncio
     include "read_vardata_code_3d.f90"
   end subroutine read_vardata_3d_r4
 
-  subroutine read_vardata_4d_r4(dset, varname, values, nslice)
+  subroutine read_vardata_4d_r4(dset, varname, values)
     real(4), allocatable, dimension(:,:,:,:), intent(inout) :: values
     include "read_vardata_code_4d.f90"
   end subroutine read_vardata_4d_r4
@@ -457,7 +456,7 @@ module module_fv3gfs_ncio
     include "read_vardata_code_3d.f90"
   end subroutine read_vardata_3d_r8
 
-  subroutine read_vardata_4d_r8(dset, varname, values, nslice)
+  subroutine read_vardata_4d_r8(dset, varname, values)
     real(8), allocatable, dimension(:,:,:,:), intent(inout) :: values
     include "read_vardata_code_4d.f90"
   end subroutine read_vardata_4d_r8
@@ -477,7 +476,7 @@ module module_fv3gfs_ncio
     include "read_vardata_code_3d.f90"
   end subroutine read_vardata_3d_int
 
-  subroutine read_vardata_4d_int(dset, varname, values, nslice)
+  subroutine read_vardata_4d_int(dset, varname, values)
     integer, allocatable, dimension(:,:,:,:), intent(inout) :: values
     include "read_vardata_code_4d.f90"
   end subroutine read_vardata_4d_int
@@ -651,12 +650,11 @@ module module_fv3gfs_ncio
       read(time_units(ipos1:ipos2),*) idate(6)
   end function get_idate_from_time_units
   
-  function get_time_units_from_idate(dset, idate, time_measure) result(time_units)
+  function get_time_units_from_idate(idate, time_measure) result(time_units)
       ! create time units attribute of form 'hours since YYYY-MM-DD HH:MM:SS'
       ! from integer array with year,month,day,hour,minute,second
       ! optional argument 'time_measure' can be used to change 'hours' to
       ! 'days', 'minutes', 'seconds' etc.
-      type(Dataset), intent(in) :: dset
       character(len=*), intent(in), optional :: time_measure
       integer, intent(in) ::  idate(6)
       character(len=12) :: timechar
