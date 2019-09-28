@@ -541,37 +541,37 @@ module module_fv3gfs_ncio
     include "write_vardata_code.f90"
   end subroutine write_vardata_4d_int
 
-  subroutine read_attribute_int_scalar(dset, attname, values, varname)
+  subroutine read_attribute_int_scalar(dset, attname, values, varname, errcode)
     integer, intent(inout) :: values
     include "read_scalar_attribute_code.f90"
   end subroutine read_attribute_int_scalar
 
-  subroutine read_attribute_r4_scalar(dset, attname, values, varname)
+  subroutine read_attribute_r4_scalar(dset, attname, values, varname, errcode)
     real(4), intent(inout) :: values
     include "read_scalar_attribute_code.f90"
   end subroutine read_attribute_r4_scalar
 
-  subroutine read_attribute_r8_scalar(dset, attname, values, varname)
+  subroutine read_attribute_r8_scalar(dset, attname, values, varname, errcode)
     real(8), intent(inout) :: values
     include "read_scalar_attribute_code.f90"
   end subroutine read_attribute_r8_scalar
 
-  subroutine read_attribute_r4_1d(dset, attname, values, varname)
+  subroutine read_attribute_r4_1d(dset, attname, values, varname, errcode)
     real(4), intent(inout), allocatable, dimension(:) :: values
     include "read_attribute_code.f90"
   end subroutine read_attribute_r4_1d
 
-  subroutine read_attribute_r8_1d(dset, attname, values, varname)
+  subroutine read_attribute_r8_1d(dset, attname, values, varname, errcode)
     real(8), intent(inout), allocatable, dimension(:) :: values
     include "read_attribute_code.f90"
   end subroutine read_attribute_r8_1d
 
-  subroutine read_attribute_int_1d(dset, attname, values, varname)
+  subroutine read_attribute_int_1d(dset, attname, values, varname, errcode)
     integer, intent(inout), allocatable, dimension(:) :: values
     include "read_attribute_code.f90"
   end subroutine read_attribute_int_1d
 
-  subroutine read_attribute_char(dset, attname, values, varname)
+  subroutine read_attribute_char(dset, attname, values, varname, errcode)
     character(len=*), intent(inout) :: values
     include "read_scalar_attribute_code.f90"
   end subroutine read_attribute_char
