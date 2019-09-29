@@ -11,6 +11,7 @@
     logical return_errcode
     if(present(errcode)) then
         return_errcode=.true.
+        errcode = 0
     else
         return_errcode=.false.
     endif
