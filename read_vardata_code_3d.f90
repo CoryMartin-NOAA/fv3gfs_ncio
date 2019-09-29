@@ -36,7 +36,7 @@
     if (allocated(values)) deallocate(values)
     allocate(values(n1,n2,n3))
     if (dset%variables(nvar)%ndims == 4 .and. n4 == 1) then
-       ! 4d variable, return 3d slice along last dimension
+       ! return slice along last dimension
        ncerr = nf90_get_var(dset%ncid, dset%variables(nvar)%varid, values,&
                start=(/1,1,1,ncount/), count=(/n1,n2,n3,1/))
     else

@@ -49,14 +49,16 @@ module module_fv3gfs_ncio
       module procedure read_vardata_1d_r4, read_vardata_2d_r4, read_vardata_3d_r4,&
       read_vardata_4d_r4, read_vardata_1d_r8, read_vardata_2d_r8, read_vardata_3d_r8,&
       read_vardata_4d_r8, read_vardata_1d_int, read_vardata_2d_int, &
-      read_vardata_3d_int, read_vardata_4d_int
+      read_vardata_3d_int, read_vardata_4d_int,&
+      read_vardata_5d_r4, read_vardata_5d_r8, read_vardata_5d_int 
   end interface
 
   interface write_vardata
       module procedure write_vardata_1d_r4, write_vardata_2d_r4, write_vardata_3d_r4,&
       write_vardata_4d_r4, write_vardata_1d_r8, write_vardata_2d_r8, write_vardata_3d_r8,&
       write_vardata_4d_r8, write_vardata_1d_int, write_vardata_2d_int, &
-      write_vardata_3d_int, write_vardata_4d_int
+      write_vardata_3d_int, write_vardata_4d_int, &
+      write_vardata_5d_int, write_vardata_5d_r4, write_vardata_5d_r8
   end interface
 
   interface read_attribute
@@ -553,10 +555,15 @@ module module_fv3gfs_ncio
     include "read_vardata_code_3d.f90"
   end subroutine read_vardata_3d_r4
 
-  subroutine read_vardata_4d_r4(dset, varname, values, errcode)
+  subroutine read_vardata_4d_r4(dset, varname, values, nslice, errcode)
     real(4), allocatable, dimension(:,:,:,:), intent(inout) :: values
     include "read_vardata_code_4d.f90"
   end subroutine read_vardata_4d_r4
+
+  subroutine read_vardata_5d_r4(dset, varname, values, errcode)
+    real(4), allocatable, dimension(:,:,:,:,:), intent(inout) :: values
+    include "read_vardata_code_5d.f90"
+  end subroutine read_vardata_5d_r4
 
   subroutine read_vardata_1d_r8(dset, varname, values, nslice, errcode)
     real(8), allocatable, dimension(:), intent(inout) :: values
@@ -573,10 +580,15 @@ module module_fv3gfs_ncio
     include "read_vardata_code_3d.f90"
   end subroutine read_vardata_3d_r8
 
-  subroutine read_vardata_4d_r8(dset, varname, values, errcode)
+  subroutine read_vardata_4d_r8(dset, varname, values, nslice, errcode)
     real(8), allocatable, dimension(:,:,:,:), intent(inout) :: values
     include "read_vardata_code_4d.f90"
   end subroutine read_vardata_4d_r8
+
+  subroutine read_vardata_5d_r8(dset, varname, values, errcode)
+    real(8), allocatable, dimension(:,:,:,:,:), intent(inout) :: values
+    include "read_vardata_code_5d.f90"
+  end subroutine read_vardata_5d_r8
 
   subroutine read_vardata_1d_int(dset, varname, values, nslice, errcode)
     integer, allocatable, dimension(:), intent(inout) :: values
@@ -593,10 +605,15 @@ module module_fv3gfs_ncio
     include "read_vardata_code_3d.f90"
   end subroutine read_vardata_3d_int
 
-  subroutine read_vardata_4d_int(dset, varname, values, errcode)
+  subroutine read_vardata_4d_int(dset, varname, values, nslice, errcode)
     integer, allocatable, dimension(:,:,:,:), intent(inout) :: values
     include "read_vardata_code_4d.f90"
   end subroutine read_vardata_4d_int
+
+  subroutine read_vardata_5d_int(dset, varname, values, errcode)
+    integer, allocatable, dimension(:,:,:,:,:), intent(inout) :: values
+    include "read_vardata_code_5d.f90"
+  end subroutine read_vardata_5d_int
 
   subroutine write_vardata_1d_r4(dset, varname, values, nslice, errcode)
     real(4),  dimension(:), intent(in) :: values
@@ -618,6 +635,11 @@ module module_fv3gfs_ncio
     include "write_vardata_code.f90"
   end subroutine write_vardata_4d_r4
 
+  subroutine write_vardata_5d_r4(dset, varname, values, nslice, errcode)
+    real(4),  dimension(:,:,:,:,:), intent(in) :: values
+    include "write_vardata_code.f90"
+  end subroutine write_vardata_5d_r4
+
   subroutine write_vardata_1d_r8(dset, varname, values, nslice, errcode)
     real(8),  dimension(:), intent(in) :: values
     include "write_vardata_code.f90"
@@ -638,6 +660,11 @@ module module_fv3gfs_ncio
     include "write_vardata_code.f90"
   end subroutine write_vardata_4d_r8
 
+  subroutine write_vardata_5d_r8(dset, varname, values, nslice, errcode)
+    real(8),  dimension(:,:,:,:,:), intent(in) :: values
+    include "write_vardata_code.f90"
+  end subroutine write_vardata_5d_r8
+
   subroutine write_vardata_1d_int(dset, varname, values, nslice, errcode)
     integer,  dimension(:), intent(in) :: values
     include "write_vardata_code.f90"
@@ -657,6 +684,11 @@ module module_fv3gfs_ncio
     integer,  dimension(:,:,:,:), intent(in) :: values
     include "write_vardata_code.f90"
   end subroutine write_vardata_4d_int
+
+  subroutine write_vardata_5d_int(dset, varname, values, nslice, errcode)
+    integer,  dimension(:,:,:,:,:), intent(in) :: values
+    include "write_vardata_code.f90"
+  end subroutine write_vardata_5d_int
 
   subroutine read_attribute_int_scalar(dset, attname, values, varname, errcode)
     integer, intent(inout) :: values
