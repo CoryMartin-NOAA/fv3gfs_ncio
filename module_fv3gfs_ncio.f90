@@ -1,9 +1,7 @@
 module module_fv3gfs_ncio
 ! module for reading/writing netcdf global lat/lon grid files output by FV3GFS
-
 ! jeff whitaker 201909
 
-! ifort -I${NETCDF}/include -c -traceback module_fv3gfs_ncio.f90
   use netcdf
 
   implicit none

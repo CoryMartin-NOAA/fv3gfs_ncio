@@ -1,6 +1,4 @@
 program test_fv3gfs_ncio
-! ifort -traceback test_fv3gfs_ncio.f90 module_fv3gfs_ncio.o -L${NETCDF}/lib
-! -lnetcdf -lnetcdff
   use netcdf
   use module_fv3gfs_ncio
   implicit none

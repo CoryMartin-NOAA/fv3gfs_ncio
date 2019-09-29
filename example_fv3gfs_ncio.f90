@@ -1,6 +1,4 @@
 program example_fv3gfs_ncio
-! ifort -traceback example_fv3gfs_ncio.f90 module_fv3gfs_ncio.o -L${NETCDF}/lib
-! -lnetcdf -lnetcdff
   use module_fv3gfs_ncio
   character(len=500) filename
   type(Dataset) :: dsetin, dset
