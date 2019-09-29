@@ -24,6 +24,7 @@
     ncerr = nf90_inquire_attribute(dset%ncid, varid, attname, len=nlen)
     if (return_errcode) then
         errcode=ncerr
+        return
     else
         call nccheck(ncerr)
     endif

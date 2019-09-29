@@ -23,6 +23,7 @@
     if (dset%variables(nvar)%ndims /= 1 .and. dset%variables(nvar)%ndims /= 2) then
        if (return_errcode) then
           errcode=nf90_ebaddim
+          return
        else
           print *,'rank of data array != variable ndims (or ndims-1)'
           stop "stopped"
