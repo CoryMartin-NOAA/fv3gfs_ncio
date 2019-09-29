@@ -105,17 +105,13 @@ module module_fv3gfs_ncio
     character(len=*), intent(in) :: dimname
     logical foundit
     integer ndim
-    foundit = .false.
+    get_ndim = -1
     do ndim=1,dset%ndims
        if (trim(dset%dimensions(ndim)%name) == trim(dimname)) then 
+          get_ndim = ndim
           exit
        endif
     enddo
-    if (.not. foundit) then
-       print *,'no dimension named ',dimname
-       stop "stopped"
-    endif
-    get_ndim = ndim
   end function get_ndim
 
   function get_var(dset, varname) result (var)
@@ -133,18 +129,13 @@ module module_fv3gfs_ncio
     character(len=*), intent(in) :: varname
     logical foundit
     integer nvar
-    foundit = .false.
+    get_nvar = -1
     do nvar=1,dset%nvars
        if (trim(dset%variables(nvar)%name) == trim(varname)) then 
-          foundit = .true.
+          get_nvar = nvar
           exit
        endif
     enddo
-    if (.not. foundit) then
-       print *,'no variable named ',varname
-       stop "stopped"
-    endif
-    get_nvar = nvar
   end function get_nvar
 
   subroutine set_varunlimdimlens_(dset,errcode)
