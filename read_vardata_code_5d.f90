@@ -1,7 +1,3 @@
-    ! read all data from variable varname, return in it array values.
-    ! on input, values should be an allocatable array with the correct
-    ! with the correct number of dimensions.  If values is allocated,
-    ! it we deallocated and reallocated.
     type(Dataset), intent(in) :: dset
     character(len=*), intent(in) :: varname
     integer, intent(out), optional :: errcode

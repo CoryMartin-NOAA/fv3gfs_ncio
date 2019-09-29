@@ -1,8 +1,3 @@
-    ! read attribute 'attname' return in 'values'.  If optional
-    ! argument 'varname' is given, an variable attribute is returned.
-    ! if the attribute is an 1d array, values should be an allocatable 1d
-    ! array of the correct type. if values is allocated, it be deallocated
-    ! and reallocated.
     type(Dataset), intent(in) :: dset
     character(len=*), intent(in), optional :: varname
     character(len=*), intent(in) :: attname

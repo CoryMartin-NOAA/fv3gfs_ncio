@@ -188,6 +188,8 @@ module module_fv3gfs_ncio
  
   function open_dataset(filename,errcode) result(dset)
     ! open existing dataset, create dataset object for reading netcdf file 
+    ! if optional error return code errcode is not specified,
+    ! program will stop if a nonzero error code returned by the netcdf lib.
     implicit none
     character(len=*), intent(in) :: filename
     type(Dataset) :: dset
@@ -285,6 +287,8 @@ module module_fv3gfs_ncio
     ! If copy_vardata=T, all variable data (not just coordinate
     ! variable data) is copied. Default is F (only coord var data
     ! copied).
+    ! if optional error return code errcode is not specified,
+    ! program will stop if a nonzero error code returned by the netcdf lib.
     implicit none
     character(len=*), intent(in) :: filename
     character(len=nf90_max_name) :: attname, varname
@@ -513,7 +517,9 @@ module module_fv3gfs_ncio
   end function create_dataset
  
   subroutine close_dataset(dset,errcode)
-    ! deallocate members of dataset object
+    ! close netcdf file, deallocate members of dataset object.
+    ! if optional error return code errcode is not specified,
+    ! program will stop if a nonzero error code returned by the netcdf lib.
     type(Dataset), intent(inout) :: dset
     integer, intent(out), optional :: errcode
     integer ncerr, nvar
@@ -539,6 +545,45 @@ module module_fv3gfs_ncio
     enddo
     deallocate(dset%variables,dset%dimensions)
   end subroutine close_dataset
+ 
+  !subroutine read_vardata(dset,varname,values,nslice,errcode)
+  ! read data from variable varname in dataset dset, return in it array values.
+  ! dset:    Input dataset instance returned by open_dataset/create_dataset.
+  ! varname: Input string name of variable.
+  ! values:  Array to hold variable data.  Must be
+  !          an allocatable array with same rank 
+  !          as variable varname (or 1 dimension less).
+  ! nslice:  optional index along last dimension of 
+  !          variable if rank of values is rank of 
+  !          variable minus 1.  Default is 1.  
+  ! errcode: optional error return code.  If not specified,
+  !          program will stop if a nonzero error code returned
+  !          from netcdf library.
+
+  !subroutine write_vardata(dset,varname,values,nslice,errcode)
+  ! write data (in array values) to variable varname in dataset dset.
+  ! dset:    Input dataset instance returned by open_dataset/create_dataset.
+  ! varname: Input string name of variable.
+  ! values:  Array with variable data.  Must be
+  !          an allocatable array with same rank 
+  !          as variable varname (or 1 dimension less).
+  ! nslice:  optional index along last dimension of 
+  !          variable if rank of values is rank of 
+  !          variable minus 1.  Default is 1.  
+  ! errcode: optional error return code.  If not specified,
+  !          program will stop if a nonzero error code returned
+  !          from netcdf library.
+
+  !subroutine read_attribute(dset, attname, values, varname, errcode)
+  ! read attribute 'attname' return in 'values'.  If optional
+  ! argument 'varname' is given, a variable attribute is returned.
+  ! if the attribute is a 1d array, values should be an allocatable 1d
+  ! array of the correct type.
+
+  !subroutine write_attribute(dset, attname, values, varname, errcode)
+  ! write attribute 'attname' with data in 'values'.  If optional
+  ! argument 'varname' is given, a variable attribute is written.
+  ! values can be a real(4), real(8), integer, string or 1d array.
 
   subroutine read_vardata_1d_r4(dset, varname, values, nslice, errcode)
     real(4), allocatable, dimension(:), intent(inout) :: values
