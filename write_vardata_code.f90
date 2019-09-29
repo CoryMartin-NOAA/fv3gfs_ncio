@@ -58,4 +58,10 @@
        call nccheck(ncerr)
     endif
     ! reset unlim dim size for all variables
-    if (dset%variables(nvar)%hasunlim) call set_varunlimdimlens_(dset)
+    if (dset%variables(nvar)%hasunlim) then
+        if (return_errcode) then
+           call set_varunlimdimlens_(dset,errcode)
+        else
+           call set_varunlimdimlens_(dset)
+        endif
+    endif 

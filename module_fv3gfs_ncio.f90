@@ -145,10 +145,18 @@ module module_fv3gfs_ncio
     get_nvar = nvar
   end function get_nvar
 
-  subroutine set_varunlimdimlens_(dset)
+  subroutine set_varunlimdimlens_(dset,errcode)
     ! reset dimension length (dimlens) for unlim dim for all variables
     type(Dataset), intent(inout) :: dset
+    integer, intent(out), optional :: errcode
     integer ndim,n,nvar,ncerr
+    logical return_errcode
+    if(present(errcode)) then
+       return_errcode=.true.
+       errcode = 0
+    else
+       return_errcode=.false.
+    endif
     ! loop over all vars
     do nvar=1,dset%nvars
        ! does var have unlim dimension?
@@ -162,27 +170,50 @@ module module_fv3gfs_ncio
                 ncerr = nf90_inquire_dimension(dset%ncid,&
                                                dset%dimensions(n)%dimid, &
                                                len=dset%variables(nvar)%dimlens(ndim))
+                if (return_errcode) then
+                   errcode=ncerr
+                   return
+                else
+                   call nccheck(ncerr)
+                endif
                 ! also update len attribute of Dimension object
                 dset%dimensions(n)%len = dset%variables(nvar)%dimlens(ndim)
-                call nccheck(ncerr)
              endif
           enddo
        endif
     enddo
   end subroutine set_varunlimdimlens_
  
-  function open_dataset(filename) result(dset)
+  function open_dataset(filename,errcode) result(dset)
     ! open existing dataset, create dataset object for reading netcdf file 
     implicit none
     character(len=*), intent(in) :: filename
     type(Dataset) :: dset
+    integer, intent(out), optional :: errcode
     integer ncerr,nunlimdim
     integer ndim,nvar,n
+    logical return_errcode
+    if(present(errcode)) then
+       return_errcode=.true.
+       errcode = 0
+    else
+       return_errcode=.false.
+    endif
     ! open netcdf file, get info, populate Dataset object.
     ncerr = nf90_open(trim(filename), NF90_NOWRITE, ncid=dset%ncid)
-    call nccheck(ncerr)
+    if (return_errcode) then
+       errcode=ncerr
+       return
+    else
+       call nccheck(ncerr)
+    endif
     ncerr = nf90_inquire(dset%ncid, dset%ndims, dset%nvars, dset%natts, nunlimdim)
-    call nccheck(ncerr)
+    if (return_errcode) then
+       errcode=ncerr
+       return
+    else
+       call nccheck(ncerr)
+    endif
     dset%filename = trim(filename)
     allocate(dset%variables(dset%nvars))
     allocate(dset%dimensions(dset%ndims))
@@ -190,7 +221,12 @@ module module_fv3gfs_ncio
        dset%dimensions(ndim)%dimid = ndim
        ncerr = nf90_inquire_dimension(dset%ncid, ndim, name=dset%dimensions(ndim)%name, &
                                       len=dset%dimensions(ndim)%len)
-       call nccheck(ncerr)
+       if (return_errcode) then
+          errcode=ncerr
+          return
+       else
+          call nccheck(ncerr)
+       endif
        if (ndim == nunlimdim) then
           dset%dimensions(ndim)%isunlimited = .true.
        else
@@ -205,7 +241,12 @@ module module_fv3gfs_ncio
                                      natts=dset%variables(nvar)%natts,&
                                      xtype=dset%variables(nvar)%dtype,&
                                      ndims=dset%variables(nvar)%ndims)
-       call nccheck(ncerr)
+       if (return_errcode) then
+          errcode=ncerr
+          return
+       else
+          call nccheck(ncerr)
+       endif
        allocate(dset%variables(nvar)%dimids(dset%variables(nvar)%ndims))
        allocate(dset%variables(nvar)%dimindxs(dset%variables(nvar)%ndims))
        allocate(dset%variables(nvar)%dimlens(dset%variables(nvar)%ndims))
@@ -214,7 +255,12 @@ module module_fv3gfs_ncio
                                      dimids=dset%variables(nvar)%dimids,&
                                      deflate_level=dset%variables(nvar)%deflate_level,&
                                      shuffle=dset%variables(nvar)%shuffle)
-       call nccheck(ncerr)
+       if (return_errcode) then
+          errcode=ncerr
+          return
+       else
+          call nccheck(ncerr)
+       endif
        do ndim=1,dset%variables(nvar)%ndims
           do n=1,dset%ndims
             if (dset%variables(nvar)%dimids(ndim) == dset%dimensions(n)%dimid) then
@@ -231,7 +277,7 @@ module module_fv3gfs_ncio
     enddo
   end function open_dataset
 
-  function create_dataset(filename, dsetin, copy_vardata) result(dset)
+  function create_dataset(filename, dsetin, copy_vardata, errcode) result(dset)
     ! create new dataset, using an existing dataset object to define
     ! variables, dimensions and attributes.
     ! If copy_vardata=T, all variable data (not just coordinate
@@ -243,6 +289,7 @@ module module_fv3gfs_ncio
     logical, intent(in), optional :: copy_vardata
     type(Dataset) :: dset
     type(Dataset), intent(in) :: dsetin
+    integer, intent(out), optional :: errcode
     integer ncerr
     integer ndim,nvar,n,ishuffle,natt
     logical copyd, coordvar
@@ -254,6 +301,13 @@ module module_fv3gfs_ncio
     integer, allocatable, dimension(:,:) :: ivalues_2d
     integer, allocatable, dimension(:,:,:) :: ivalues_3d
     integer, allocatable, dimension(:,:,:,:) :: ivalues_4d
+    logical return_errcode
+    if(present(errcode)) then
+       return_errcode=.true.
+       errcode = 0
+    else
+       return_errcode=.false.
+    endif
     if (present(copy_vardata)) then
        copyd = .true.  ! copy all variable data
     else
@@ -264,13 +318,28 @@ module module_fv3gfs_ncio
             cmode=IOR(IOR(NF90_CLOBBER,NF90_NETCDF4),NF90_CLASSIC_MODEL), &
             !cmode=IOR(NF90_CLOBBER,NF90_NETCDF4), &
             ncid=dset%ncid)
-    call nccheck(ncerr)
+    if (return_errcode) then
+       errcode=ncerr
+       return
+    else
+       call nccheck(ncerr)
+    endif
     ! copy global attributes
     do natt=1,dsetin%natts
        ncerr = nf90_inq_attname(dsetin%ncid, NF90_GLOBAL, natt, attname)
-       call nccheck(ncerr)
+       if (return_errcode) then
+          errcode=ncerr
+          return
+       else
+          call nccheck(ncerr)
+       endif
        ncerr = nf90_copy_att(dsetin%ncid, NF90_GLOBAL, attname, dset%ncid, NF90_GLOBAL)
-       call nccheck(ncerr)
+       if (return_errcode) then
+          errcode=ncerr
+          return
+       else
+          call nccheck(ncerr)
+       endif
     enddo
     dset%natts = dsetin%natts
     dset%filename = trim(filename)
@@ -284,7 +353,12 @@ module module_fv3gfs_ncio
           ncerr = nf90_def_dim(dset%ncid, trim(dsetin%dimensions(ndim)%name), &
                   NF90_UNLIMITED, &
                   dset%dimensions(ndim)%dimid)
-          call nccheck(ncerr)
+          if (return_errcode) then
+             errcode=ncerr
+             return
+          else
+             call nccheck(ncerr)
+          endif
           dset%dimensions(ndim)%isunlimited = .true.
           dset%nunlimdim = ndim
           dset%dimensions(ndim)%len = 0
@@ -293,7 +367,12 @@ module module_fv3gfs_ncio
           ncerr = nf90_def_dim(dset%ncid, trim(dsetin%dimensions(ndim)%name),&
                   dsetin%dimensions(ndim)%len, &
                   dset%dimensions(ndim)%dimid)
-          call nccheck(ncerr)
+          if (return_errcode) then
+             errcode=ncerr
+             return
+          else
+             call nccheck(ncerr)
+          endif
           dset%dimensions(ndim)%len = dsetin%dimensions(ndim)%len
           dset%dimensions(ndim)%isunlimited = .false.
           dset%dimensions(ndim)%name = trim(dsetin%dimensions(ndim)%name)
@@ -329,7 +408,12 @@ module module_fv3gfs_ncio
                             dset%variables(nvar)%dtype, &
                             dset%variables(nvar)%dimids, &
                             dset%variables(nvar)%varid)
-       call nccheck(ncerr)
+       if (return_errcode) then
+          errcode=ncerr
+          return
+       else
+          call nccheck(ncerr)
+       endif
        if (dsetin%variables(nvar)%deflate_level > 0) then
           if (dsetin%variables(nvar)%shuffle) then
             ishuffle=1
@@ -338,7 +422,12 @@ module module_fv3gfs_ncio
           endif
           ncerr = nf90_def_var_deflate(dset%ncid, dset%variables(nvar)%varid,&
                   ishuffle,1,dsetin%variables(nvar)%deflate_level)
-          call nccheck(ncerr)
+          if (return_errcode) then
+             errcode=ncerr
+             return
+          else
+             call nccheck(ncerr)
+          endif
           dset%variables(nvar)%shuffle = dsetin%variables(nvar)%shuffle
           dset%variables(nvar)%deflate_level = &
           dsetin%variables(nvar)%deflate_level
@@ -346,13 +435,28 @@ module module_fv3gfs_ncio
        ! copy variable attributes
        do natt=1,dsetin%variables(nvar)%natts
           ncerr = nf90_inq_attname(dsetin%ncid, dsetin%variables(nvar)%varid, natt, attname)
-          call nccheck(ncerr)
+          if (return_errcode) then
+             errcode=ncerr
+             return
+          else
+             call nccheck(ncerr)
+          endif
           ncerr = nf90_copy_att(dsetin%ncid, dsetin%variables(nvar)%varid, attname, dset%ncid, dset%variables(nvar)%varid)
-          call nccheck(ncerr)
+          if (return_errcode) then
+             errcode=ncerr
+             return
+          else
+             call nccheck(ncerr)
+          endif
        enddo
     enddo
     ncerr = nf90_enddef(dset%ncid)
-    call nccheck(ncerr)
+    if (return_errcode) then
+       errcode=ncerr
+       return
+    else
+       call nccheck(ncerr)
+    endif
     ! copy variable data 
     ! assumes data is real (32 or 64 bit), or integer (16 or 32 bit) and 1-4d.
     do nvar=1,dsetin%nvars
@@ -406,12 +510,25 @@ module module_fv3gfs_ncio
     enddo
   end function create_dataset
  
-  subroutine close_dataset(dset)
+  subroutine close_dataset(dset,errcode)
     ! deallocate members of dataset object
     type(Dataset), intent(inout) :: dset
+    integer, intent(out), optional :: errcode
     integer ncerr, nvar
+    logical return_errcode
+    if(present(errcode)) then
+       return_errcode=.true.
+       errcode = 0
+    else
+       return_errcode=.false.
+    endif
     ncerr = nf90_close(ncid=dset%ncid)
-    call nccheck(ncerr)
+    if (return_errcode) then
+       errcode=ncerr
+       return
+    else
+       call nccheck(ncerr)
+    endif
     do nvar=1,dset%nvars
        deallocate(dset%variables(nvar)%dimids)
        deallocate(dset%variables(nvar)%dimindxs)
