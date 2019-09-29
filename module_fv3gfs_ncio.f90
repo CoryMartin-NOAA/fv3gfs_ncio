@@ -421,62 +421,62 @@ module module_fv3gfs_ncio
     deallocate(dset%variables,dset%dimensions)
   end subroutine close_dataset
 
-  subroutine read_vardata_1d_r4(dset, varname, values, nslice)
+  subroutine read_vardata_1d_r4(dset, varname, values, nslice, errcode)
     real(4), allocatable, dimension(:), intent(inout) :: values
     include "read_vardata_code_1d.f90"
   end subroutine read_vardata_1d_r4
 
-  subroutine read_vardata_2d_r4(dset, varname, values, nslice)
+  subroutine read_vardata_2d_r4(dset, varname, values, nslice, errcode)
     real(4), allocatable, dimension(:,:), intent(inout) :: values
     include "read_vardata_code_2d.f90"
   end subroutine read_vardata_2d_r4
 
-  subroutine read_vardata_3d_r4(dset, varname, values, nslice)
+  subroutine read_vardata_3d_r4(dset, varname, values, nslice, errcode)
     real(4), allocatable, dimension(:,:,:), intent(inout) :: values
     include "read_vardata_code_3d.f90"
   end subroutine read_vardata_3d_r4
 
-  subroutine read_vardata_4d_r4(dset, varname, values)
+  subroutine read_vardata_4d_r4(dset, varname, values, errcode)
     real(4), allocatable, dimension(:,:,:,:), intent(inout) :: values
     include "read_vardata_code_4d.f90"
   end subroutine read_vardata_4d_r4
 
-  subroutine read_vardata_1d_r8(dset, varname, values, nslice)
+  subroutine read_vardata_1d_r8(dset, varname, values, nslice, errcode)
     real(8), allocatable, dimension(:), intent(inout) :: values
     include "read_vardata_code_1d.f90"
   end subroutine read_vardata_1d_r8
 
-  subroutine read_vardata_2d_r8(dset, varname, values, nslice)
+  subroutine read_vardata_2d_r8(dset, varname, values, nslice, errcode)
     real(8), allocatable, dimension(:,:), intent(inout) :: values
     include "read_vardata_code_2d.f90"
   end subroutine read_vardata_2d_r8
 
-  subroutine read_vardata_3d_r8(dset, varname, values, nslice)
+  subroutine read_vardata_3d_r8(dset, varname, values, nslice, errcode)
     real(8), allocatable, dimension(:,:,:), intent(inout) :: values
     include "read_vardata_code_3d.f90"
   end subroutine read_vardata_3d_r8
 
-  subroutine read_vardata_4d_r8(dset, varname, values)
+  subroutine read_vardata_4d_r8(dset, varname, values, errcode)
     real(8), allocatable, dimension(:,:,:,:), intent(inout) :: values
     include "read_vardata_code_4d.f90"
   end subroutine read_vardata_4d_r8
 
-  subroutine read_vardata_1d_int(dset, varname, values, nslice)
+  subroutine read_vardata_1d_int(dset, varname, values, nslice, errcode)
     integer, allocatable, dimension(:), intent(inout) :: values
     include "read_vardata_code_1d.f90"
   end subroutine read_vardata_1d_int
 
-  subroutine read_vardata_2d_int(dset, varname, values, nslice)
+  subroutine read_vardata_2d_int(dset, varname, values, nslice, errcode)
     integer, allocatable, dimension(:,:), intent(inout) :: values
     include "read_vardata_code_2d.f90"
   end subroutine read_vardata_2d_int
 
-  subroutine read_vardata_3d_int(dset, varname, values, nslice)
+  subroutine read_vardata_3d_int(dset, varname, values, nslice, errcode)
     integer, allocatable, dimension(:,:,:), intent(inout) :: values
     include "read_vardata_code_3d.f90"
   end subroutine read_vardata_3d_int
 
-  subroutine read_vardata_4d_int(dset, varname, values)
+  subroutine read_vardata_4d_int(dset, varname, values, errcode)
     integer, allocatable, dimension(:,:,:,:), intent(inout) :: values
     include "read_vardata_code_4d.f90"
   end subroutine read_vardata_4d_int
