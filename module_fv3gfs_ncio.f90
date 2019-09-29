@@ -576,37 +576,37 @@ module module_fv3gfs_ncio
     include "read_scalar_attribute_code.f90"
   end subroutine read_attribute_char
 
-  subroutine write_attribute_int_scalar(dset, attname, values, varname)
+  subroutine write_attribute_int_scalar(dset, attname, values, varname, errcode)
     integer, intent(in) :: values
     include "write_attribute_code.f90"
   end subroutine write_attribute_int_scalar
 
-  subroutine write_attribute_r4_scalar(dset, attname, values, varname)
+  subroutine write_attribute_r4_scalar(dset, attname, values, varname, errcode)
     real(4), intent(in) :: values
     include "write_attribute_code.f90"
   end subroutine write_attribute_r4_scalar
 
-  subroutine write_attribute_r8_scalar(dset, attname, values, varname)
+  subroutine write_attribute_r8_scalar(dset, attname, values, varname, errcode)
     real(8), intent(in) :: values
     include "write_attribute_code.f90"
   end subroutine write_attribute_r8_scalar
 
-  subroutine write_attribute_r4_1d(dset, attname, values, varname)
+  subroutine write_attribute_r4_1d(dset, attname, values, varname, errcode)
     real(4), intent(in), allocatable, dimension(:) :: values
     include "write_attribute_code.f90"
   end subroutine write_attribute_r4_1d
 
-  subroutine write_attribute_r8_1d(dset, attname, values, varname)
+  subroutine write_attribute_r8_1d(dset, attname, values, varname, errcode)
     real(8), intent(in), allocatable, dimension(:) :: values
     include "write_attribute_code.f90"
   end subroutine write_attribute_r8_1d
 
-  subroutine write_attribute_int_1d(dset, attname, values, varname)
+  subroutine write_attribute_int_1d(dset, attname, values, varname, errcode)
     integer, intent(in), allocatable, dimension(:) :: values
     include "write_attribute_code.f90"
   end subroutine write_attribute_int_1d
 
-  subroutine write_attribute_char(dset, attname, values, varname)
+  subroutine write_attribute_char(dset, attname, values, varname, errcode)
     character(len=*), intent(in) :: values
     include "write_attribute_code.f90"
   end subroutine write_attribute_char
