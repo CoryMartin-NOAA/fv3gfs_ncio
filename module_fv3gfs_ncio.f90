@@ -294,10 +294,12 @@ module module_fv3gfs_ncio
     real(8), allocatable, dimension(:,:) :: values_2d
     real(8), allocatable, dimension(:,:,:) :: values_3d
     real(8), allocatable, dimension(:,:,:,:) :: values_4d
+    real(8), allocatable, dimension(:,:,:,:,:) :: values_5d
     integer, allocatable, dimension(:) :: ivalues_1d
     integer, allocatable, dimension(:,:) :: ivalues_2d
     integer, allocatable, dimension(:,:,:) :: ivalues_3d
     integer, allocatable, dimension(:,:,:,:) :: ivalues_4d
+    integer, allocatable, dimension(:,:,:,:,:) :: ivalues_5d
     logical return_errcode
     if(present(errcode)) then
        return_errcode=.true.
@@ -483,6 +485,9 @@ module module_fv3gfs_ncio
           else if (dsetin%variables(nvar)%ndims == 4) then
              call read_vardata(dsetin, varname, values_4d)
              call write_vardata(dset, varname, values_4d)
+          else if (dsetin%variables(nvar)%ndims == 5) then
+             call read_vardata(dsetin, varname, values_5d)
+             call write_vardata(dset, varname, values_5d)
           endif
        ! integer var
        elseif (dsetin%variables(nvar)%dtype == NF90_INT .or.&
@@ -499,6 +504,9 @@ module module_fv3gfs_ncio
           else if (dsetin%variables(nvar)%ndims == 4) then
              call read_vardata(dsetin, varname, ivalues_4d)
              call write_vardata(dset, varname, ivalues_4d)
+          else if (dsetin%variables(nvar)%ndims == 5) then
+             call read_vardata(dsetin, varname, ivalues_5d)
+             call write_vardata(dset, varname, ivalues_5d)
           endif
        else
           print *,'not copying variable ',trim(adjustl(varname)),&
