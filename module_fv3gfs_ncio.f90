@@ -78,7 +78,7 @@ module module_fv3gfs_ncio
   public :: open_dataset, create_dataset, close_dataset, Dataset, Variable, Dimension, &
   read_vardata, read_attribute, write_vardata, write_attribute, get_ndim, &
   get_nvar, get_var, get_dim, get_idate_from_time_units, &
-  get_time_units_from_idate, quantize_data
+  get_time_units_from_idate, quantize_data, has_var, has_attr
 
   contains
 
@@ -137,18 +137,20 @@ module module_fv3gfs_ncio
     character(len=*) :: varname
     integer nvar
     nvar = get_nvar(dset, varname)
-    if nvar > 0:
+    if (nvar > 0) then
        has_var=.true.
     else
        has_var=.false.      
+    endif
   end function has_var
 
-  logical function has_attr(dset, attname, varname=varname)
+  logical function has_attr(dset, attname, varname)
     ! returns .true. is varname exists in dset, otherwise .false.
     ! use optional kwarg varname to check for a variable attribute.
     type(Dataset) :: dset
+    character(len=*) :: attname
     character(len=*), optional :: varname
-    integer nvar, varid
+    integer nvar, varid, ncerr
     nvar = get_nvar(dset, varname)
     if(present(varname))then
         nvar = get_nvar(dset,varname)
@@ -157,10 +159,11 @@ module module_fv3gfs_ncio
         varid = NF90_GLOBAL
     endif 
     ncerr = nf90_inquire_attribute(dset%ncid, varid, attname)
-    if (ncerr /= 0) return
+    if (ncerr /= 0) then
        has_attr=.false.
     else
        has_attr=.true.      
+    endif
   end function has_attr
 
   integer function get_nvar(dset,varname)
