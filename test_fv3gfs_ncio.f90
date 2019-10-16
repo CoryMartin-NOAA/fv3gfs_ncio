@@ -15,7 +15,7 @@ program test_fv3gfs_ncio
   integer ndim,nvar,ndims,ival,idate(6),ierr,n
   filename='test_data/dynf000.nc'
   filename =&
-  '/scratch2/BMC/gsienkf/Jeffrey.S.Whitaker/C192C384_hybgain_nc/2016010106//sfg_2016010106_fhr06_mem004'
+  '/scratch2/BMC/gsienkf/Jeffrey.S.Whitaker/C192C384_hybgain_nc/2016010106//sfg_2016010106_fhr06_ensmean'
   dset = open_dataset(filename)
   print *,'ncid=',dset%ncid
   print *,'nvars=',dset%nvars

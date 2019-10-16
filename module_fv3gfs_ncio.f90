@@ -112,7 +112,6 @@ module module_fv3gfs_ncio
     ! get dimension index given name
     type(Dataset), intent(in) :: dset
     character(len=*), intent(in) :: dimname
-    logical foundit
     integer ndim
     get_ndim = -1
     do ndim=1,dset%ndims
@@ -132,11 +131,42 @@ module module_fv3gfs_ncio
     var = dset%variables(nvar)
   end function get_var
 
+  logical function has_var(dset, varname)
+    ! returns .true. is varname exists in dset, otherwise .false.
+    type(Dataset) :: dset
+    character(len=*) :: varname
+    integer nvar
+    nvar = get_nvar(dset, varname)
+    if nvar > 0:
+       has_var=.true.
+    else
+       has_var=.false.      
+  end function has_var
+
+  logical function has_attr(dset, attname, varname=varname)
+    ! returns .true. is varname exists in dset, otherwise .false.
+    ! use optional kwarg varname to check for a variable attribute.
+    type(Dataset) :: dset
+    character(len=*), optional :: varname
+    integer nvar, varid
+    nvar = get_nvar(dset, varname)
+    if(present(varname))then
+        nvar = get_nvar(dset,varname)
+        varid = dset%variables(nvar)%varid
+    else
+        varid = NF90_GLOBAL
+    endif 
+    ncerr = nf90_inquire_attribute(dset%ncid, varid, attname)
+    if (ncerr /= 0) return
+       has_attr=.false.
+    else
+       has_attr=.true.      
+  end function has_attr
+
   integer function get_nvar(dset,varname)
     ! get variable index given name
     type(Dataset), intent(in) :: dset
     character(len=*), intent(in) :: varname
-    logical foundit
     integer nvar
     get_nvar = -1
     do nvar=1,dset%nvars
