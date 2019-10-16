@@ -59,11 +59,10 @@ call write_vardata(dso, 'time', times)
 ! integers, and this avoids the need for the client to apply the
 ! rescaling (plus it allows the ability to adjust the packing range).
 data_save = data
-dataMax = maxval(data); dataMin = minval(data)
-! fvgfs multi-level data quantized with nbits = 14
-data = quantized(data_save, nbits, dataMin, dataMax)
-! compute max abs compression error to save as a variable attribute.
-compress_err = maxval(abs(data_save-data))
+nbits = 14
+call quantize_data(data_save, data, nbits, compress_err)
+! compress_err is the max abs compression error (can be saved
+! as a variable attribute.
 ```
 * write an attribute.
 ```fortran
