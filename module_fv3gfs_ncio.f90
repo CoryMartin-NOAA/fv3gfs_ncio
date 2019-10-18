@@ -1,6 +1,6 @@
 module module_fv3gfs_ncio
 ! module for reading/writing netcdf global lat/lon grid files output by FV3GFS
-! jeff whitaker 201909
+! jeff whitaker <jeffrey.s.whitaker@noaa.gov>  201910
 
   use netcdf
 
@@ -140,7 +140,7 @@ module module_fv3gfs_ncio
     if (nvar > 0) then
        has_var=.true.
     else
-       has_var=.false.      
+       has_var=.false.
     endif
   end function has_var
 
@@ -154,15 +154,19 @@ module module_fv3gfs_ncio
     nvar = get_nvar(dset, varname)
     if(present(varname))then
         nvar = get_nvar(dset,varname)
+        if (nvar < 0) then
+           has_attr = .false.
+           return
+        endif
         varid = dset%variables(nvar)%varid
     else
         varid = NF90_GLOBAL
-    endif 
+    endif
     ncerr = nf90_inquire_attribute(dset%ncid, varid, attname)
     if (ncerr /= 0) then
        has_attr=.false.
     else
-       has_attr=.true.      
+       has_attr=.true.
     endif
   end function has_attr
 

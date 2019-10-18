@@ -13,9 +13,8 @@ program test_fv3gfs_ncio
   real(4), allocatable, dimension(:,:,:,:) :: values_4d
   real(4) mval,r4val
   integer ndim,nvar,ndims,ival,idate(6),ierr,n
+  logical hasit
   filename='test_data/dynf000.nc'
-  filename =&
-  '/scratch2/BMC/gsienkf/Jeffrey.S.Whitaker/C192C384_hybgain_nc/2016010106//sfg_2016010106_fhr06_ensmean'
   dset = open_dataset(filename)
   print *,'ncid=',dset%ncid
   print *,'nvars=',dset%nvars
@@ -51,8 +50,10 @@ program test_fv3gfs_ncio
   print *,'min/max pfull (1d_r8)'
   call read_vardata(dset, 'pfull', values8_1d)
   print *,minval(values8_1d),maxval(values8_1d)
-  call read_attribute(dset,'max_abs_compression_error',r4val,'pressfc')
-  print *,'max_abs_compression_error for pressfc = ',r4val
+  hasit = has_var(dset,'pressfc')
+  print *,'has var pressfc',hasit
+  hasit = has_attr(dset,'max_abs_compression_error','pressfc')
+  print *,'pressfc has max_abs_compression_error attribute',hasit
   call read_attribute(dset,'ncnsto',ival)
   print *,'ncnsto =',ival
   call read_attribute(dset,'ak',values_1d)
