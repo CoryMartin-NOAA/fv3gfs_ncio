@@ -30,6 +30,7 @@ call read_vardata(ds,'latitudes',lons)
 call read_vardata(ds,'pressfc',psfc)
 ```
 * create a new dataset from a template dataset.
+
 A template dataset can be created from a cdl file by running
 `ncgen -4 <input cdl file> -o <output netcdf filename>`.
 A cdl file can be created from an existing dataset by running
