@@ -33,7 +33,8 @@ call read_vardata(ds,'pressfc',psfc)
 
 A template dataset can be created from a cdl file by running
 `ncgen -7 -o <output netcdf filename> <input cdl file>`.
-A cdl file can be created from an existing dataset by running
+A [cdl](https://www.unidata.ucar.edu/software/netcdf/netcdf/CDL-Syntax.html)
+file can be created from an existing dataset by running
 `ncdump -cs <existing dataset> > <output cdl file>`. The cdl
 text file can be edited with a text editor.
 ```fortran
