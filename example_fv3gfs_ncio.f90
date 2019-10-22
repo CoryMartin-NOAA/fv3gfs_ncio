@@ -6,7 +6,7 @@ program example_fv3gfs_ncio
   real(4), allocatable, dimension(:,:,:) :: values_3d
   integer ndim,nvar
   ! template file created by running ncdump -cs on full file, then running
-  ! ncgen -4 <output of ncdump -cs> -o <output netcdf filename>
+  ! ncgen -7 -o <output netcdf filename>  <output of ncdump -cs>
   ! only coordinate variables have data
   dsetin = open_dataset('test_data/dynf000_template.nc')
   ! create a copy of the template file
