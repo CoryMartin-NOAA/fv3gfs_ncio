@@ -68,7 +68,7 @@ data_save = data
 nbits = 14
 call quantize_data(data_save, data, nbits, compress_err)
 ! compress_err is the max abs compression error (can be saved
-! as a variable attribute.
+! as a variable attribute).
 ```
 * write an attribute.
 ```fortran
