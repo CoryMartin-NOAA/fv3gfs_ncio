@@ -6,6 +6,7 @@ module module_fv3gfs_ncio
 ! jeff whitaker <jeffrey.s.whitaker@noaa.gov>  201910
 
   use netcdf
+  use mpi
 
   implicit none
   private
@@ -41,6 +42,7 @@ module module_fv3gfs_ncio
      integer :: natts ! number of dataset (global) attributes
      integer :: nunlimdim ! dimension ID for unlimited dimension
      logical :: ishdf5 ! is underlying disk format HDF5?
+     logical :: isparallel ! was file opened for parallel I/O?
      character(len=500) filename ! netCDF filename
      ! array of Variable instances
      type(Variable), allocatable, dimension(:) :: variables
@@ -246,7 +248,7 @@ module module_fv3gfs_ncio
     enddo
   end subroutine set_varunlimdimlens_
  
-  function open_dataset(filename,errcode) result(dset)
+  function open_dataset(filename,errcode,paropen) result(dset)
     ! open existing dataset, create dataset object for reading netcdf file 
     ! if optional error return code errcode is not specified,
     ! program will stop if a nonzero error code returned by the netcdf lib.
@@ -254,6 +256,7 @@ module module_fv3gfs_ncio
     character(len=*), intent(in) :: filename
     type(Dataset) :: dset
     integer, intent(out), optional :: errcode
+    logical, intent(in), optional :: paropen
     integer ncerr,nunlimdim,ndim,nvar,n,formatnum
     logical return_errcode
     if(present(errcode)) then
@@ -262,8 +265,22 @@ module module_fv3gfs_ncio
     else
        return_errcode=.false.
     endif
+    if (present(paropen)) then
+       if (paropen) then
+         dset%isparallel = .true.
+       else
+         dset%isparallel = .false.
+       end if
+    else
+      dset%isparallel = .false.
+    end if
     ! open netcdf file, get info, populate Dataset object.
-    ncerr = nf90_open(trim(filename), NF90_NOWRITE, ncid=dset%ncid)
+    if (dset%isparallel) then
+      ncerr = nf90_open(trim(filename), ior(NF90_NOWRITE, NF90_MPIIO), &
+                        comm=mpi_comm_world, info = mpi_info_null, ncid=dset%ncid)
+    else
+      ncerr = nf90_open(trim(filename), NF90_NOWRITE, ncid=dset%ncid)
+    end if
     if (return_errcode) then
        call nccheck(ncerr,halt=.false.)
        errcode=ncerr
