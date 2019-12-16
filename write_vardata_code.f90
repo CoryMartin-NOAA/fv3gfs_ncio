@@ -1,6 +1,7 @@
     type(Dataset), intent(inout) :: dset
     character(len=*), intent(in) :: varname
     integer, intent(in), optional :: nslice
+    integer, intent(in), optional :: slicedim
     integer, intent(out), optional :: errcode
     integer ncerr, nvar, ncount, n1,n2,n3
     logical is_slice
