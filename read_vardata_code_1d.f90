@@ -4,6 +4,7 @@
     integer, intent(in), optional :: slicedim
     integer, intent(out), optional :: errcode
     integer ncerr, nvar, n, nd, dimlen, ncount
+    integer, allocatable, dimension(:) :: start, count
     logical return_errcode
     if(present(errcode)) then
        return_errcode=.true.
