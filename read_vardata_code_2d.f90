@@ -53,9 +53,12 @@
     endif
     if (allocated(values)) deallocate(values)
     allocate(values(dimlens(1),dimlens(2)))
-    ! return slice along last dimension
-    ncerr = nf90_get_var(dset%ncid, dset%variables(nvar)%varid, values,&
-            start=start, count=count)
+    if (dset%variables(nvar)%ndims == 3) then
+       ncerr = nf90_get_var(dset%ncid, dset%variables(nvar)%varid, values,&
+               start=start, count=count)
+    else
+       ncerr = nf90_get_var(dset%ncid, dset%variables(nvar)%varid, values)
+    end if
     if (return_errcode) then
        call nccheck(ncerr,halt=.false.)
        errcode=ncerr

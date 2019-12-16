@@ -48,8 +48,12 @@
     endif
     if (allocated(values)) deallocate(values)
     allocate(values(dimlen))
-    ncerr = nf90_get_var(dset%ncid, dset%variables(nvar)%varid, values,&
-            start=start, count=count)
+    if (dset%variables(nvar)%ndims == 2) then
+       ncerr = nf90_get_var(dset%ncid, dset%variables(nvar)%varid, values,&
+               start=start, count=count)
+    else
+       ncerr = nf90_get_var(dset%ncid, dset%variables(nvar)%varid, values)
+    end if
     if (return_errcode) then
        call nccheck(ncerr,halt=.false.)
        errcode=ncerr
